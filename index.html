@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Покупки">
-<meta name="copyright" content="© 2026 [Ваше имя]. Все права защищены.">
+<meta name="copyright" content="© 2026 Elena Kirsanova. Все права защищены.">
 <meta name="theme-color" content="#eef4f7">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -115,12 +115,23 @@ details summary::-webkit-details-marker{display:none}
 .help details{border-top:1px solid var(--line);padding:10px 0}.help details:first-of-type{border-top:0}
 .help p,.help ul{font-size:16px;line-height:1.45;margin:8px 0 0;color:var(--txt)}.help ul{padding-left:20px}.help li{margin-bottom:6px}
 .warn summary{color:var(--bad)!important}
+.hrow{display:flex;align-items:center;gap:10px}.hrow>div{flex:1;min-width:0}
+.hsync{flex:none;border:0;background:var(--soft);color:var(--acc);width:46px;height:46px;border-radius:50%;font-size:24px;align-items:center;justify-content:center}
+.hsync.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.btn.busy{opacity:.55;pointer-events:none}
+#photoPrev{grid-template-columns:repeat(3,1fr);gap:8px}
+.thumb{position:relative}.thumb img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
+.thumb.big img{aspect-ratio:auto;object-fit:contain}
+.thumb .x{position:absolute;top:6px;right:6px;background:var(--card);border-radius:50%;opacity:1;padding:3px 8px;font-size:14px}
+.phbox{max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.steps{padding-left:20px;margin:8px 0 0;font-size:15px;line-height:1.45}.steps li{margin-bottom:8px}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--soft);padding:10px;border-radius:10px;white-space:pre;overflow-x:auto;margin-top:6px}
 .preview{margin-top:8px;padding:12px;border-radius:14px;background:var(--soft);font-weight:500}
 </style>
 </head>
 <body>
 <div class="bgl"></div>
-<header><h1 id="ttl">Список покупок</h1><div class="sub" id="sub"></div></header>
+<header><div class="hrow"><div><h1 id="ttl">Список покупок</h1><div class="sub" id="sub"></div></div><button id="hSync" class="hsync" style="display:none" aria-label="Синхронизировать" title="Синхронизировать">⟳</button></div></header>
 
 <main>
 <!-- ===== СПИСОК ===== -->
@@ -166,8 +177,8 @@ details summary::-webkit-details-marker{display:none}
     <input id="eAmt" inputmode="decimal" placeholder="Сумма" style="margin-top:14px;font-size:1.35em;font-weight:600">
     <input id="eNote" placeholder="Комментарий (необязательно)" style="margin-top:8px">
     <div class="muted" style="margin:14px 0 8px">Категория (необязательно)</div><div class="chips" id="eCats"></div>
-    <button class="btn ghost" id="photoBtn" style="padding:10px;font-size:15px;margin-top:14px">📷 Добавить фото чека</button><input type="file" id="photoIn" accept="image/*" hidden>
-    <div id="photoPrev" style="display:none;margin-top:8px;position:relative"><img id="photoImg" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px;display:block"><button class="x" id="photoDel" style="position:absolute;top:8px;right:8px;background:var(--card);border-radius:50%;opacity:1">✕</button></div>
+    <button class="btn ghost" id="photoBtn" style="padding:10px;font-size:15px;margin-top:14px">📷 Добавить фото чека</button><input type="file" id="photoIn" accept="image/*" multiple hidden><input type="file" id="photoQuick" accept="image/*" multiple hidden>
+    <div id="photoPrev" style="display:none;margin-top:8px"></div>
     <button class="btn" id="eSave">Сохранить расход</button>
     <button class="btn ghost" id="eCancel" style="display:none">Отменить редактирование</button>
   </div>
@@ -203,6 +214,25 @@ details summary::-webkit-details-marker{display:none}
 
 <!-- ===== НАСТРОЙКИ ===== -->
 <section class="tab" id="t-set">
+  <div class="card"><h2>Облачная синхронизация</h2>
+    <div id="syOn" style="display:none">
+      <div class="muted">Подключено к облаку: <b id="syProj"></b></div>
+      <div class="muted" id="syStat" style="margin-top:4px"></div>
+      <button class="btn" id="syBtn">⟳ Синхронизировать</button>
+      <div class="grid2" style="margin-top:8px"><button class="btn soft" id="syShare">Отправить код на другое устройство</button><button class="btn soft" id="syCopy">Скопировать код</button></div>
+      <button class="btn ghost" id="syLeave">Отключить на этом устройстве</button>
+    </div>
+    <div id="syOff">
+      <div class="muted">Общие записи и список покупок на нескольких iPhone/iPad. Нужен бесплатный проект Google Firebase — пошаговая инструкция ниже, в «Как пользоваться».</div>
+      <div style="font-weight:600;margin-top:14px;font-size:16px">Первое устройство</div>
+      <input id="syPid" placeholder="Project ID, например spisok-elena" autocapitalize="off" autocorrect="off" spellcheck="false" style="margin-top:8px;font-size:16px">
+      <input id="syKey" placeholder="apiKey (начинается с AIza…)" autocapitalize="off" autocorrect="off" spellcheck="false" style="margin-top:8px;font-size:16px">
+      <button class="btn" id="syCreate">Создать общее хранилище</button>
+      <div style="font-weight:600;margin-top:18px;font-size:16px">Второе устройство</div>
+      <textarea id="syCode" placeholder="Вставьте код подключения (SYNC1:…)" style="min-height:4em;margin-top:8px;font-size:15px"></textarea>
+      <div class="grid2" style="margin-top:8px"><button class="btn soft" id="syPaste">Вставить</button><button class="btn" id="syJoin">Подключиться по коду</button></div>
+    </div>
+  </div>
   <div class="card"><h2>Оформление</h2><div class="themes" id="themes"></div></div>
   <div class="card"><h2>Размер шрифта</h2><input type="range" id="fsr" min="16" max="40" step="1"><div class="preview" id="fsv">Молоко, хлеб, яйца</div></div>
   <div class="card"><h2>Валюта</h2>
@@ -231,6 +261,31 @@ details summary::-webkit-details-marker{display:none}
     <details><summary>Отделы, цены и корзина</summary><p>Продукты сами раскладываются по отделам магазина (овощи, молочное, бакалея…) — кнопка «По отделам» включает и выключает группировку. Нажмите ⋯ у продукта: можно исправить название, вписать цену и сменить отдел — приложение запомнит отдел для этого продукта.</p><p>Если цены вписаны, вверху видно «В корзине» (отмеченное) и сумму всего списка. Кнопка «Записать купленное в расходы» переносит отмеченные продукты в новую запись расхода с расшифровкой — останется выбрать магазин.</p></details>
     <details><summary>Шаблоны списков</summary><p>Составьте частый список → «Шаблоны списков» → впишите название → «+». Потом одно касание «Добавить» — и продукты в списке (без повторов).</p></details>
     <details><summary>Категории и фото чеков</summary><p>При записи расхода можно выбрать категорию (Продукты, Транспорт, Дом и ЖКХ…). Для каждого магазина категория запоминается. В «Аналитике» переключатель «Категории» показывает расходы по категориям. Список категорий меняется в Настройках.</p><p>«Фото чека» — снимок сохраняется к записи (значок 🧾 открывает его). Фото хранятся на телефоне и входят в архив.</p></details>
+    <details><summary>Фото к сохранённым записям</summary><p>У каждой записи в «Последних записях» и в «Журнале» есть значок: 📷 — добавить фото (можно сразу несколько), 🧾 — открыть фото (цифра — сколько их). В просмотре можно добавить ещё, поделиться или удалить отдельное фото. Через ✎ можно изменить всё в записи, включая фото.</p></details>
+    <details><summary>☁️ Синхронизация между устройствами — настройка</summary>
+      <p>Данные хранятся в вашем личном бесплатном облаке Google Firebase. Настраивается один раз (~10 минут), удобнее с компьютера или iPad.</p>
+      <ol class="steps">
+        <li>Откройте <b>console.firebase.google.com</b>, войдите в Google-аккаунт → «Создать проект» (Create project). Название, например <i>spisok-pokupok</i>. Google Analytics — <b>отключить</b>. «Создать».</li>
+        <li>Слева: Build (Создание) → <b>Firestore Database</b> → «Create database» (Создать базу данных).</li>
+        <li>Выпуск <b>Standard</b>, расположение <b>eur3 (Europe)</b> → режим <b>Production mode</b> → «Create».</li>
+        <li>Вкладка <b>Rules</b> (Правила): удалите всё и вставьте текст ниже → «Publish» (Опубликовать).<div class="code" id="rulesTxt">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /spaces/{space}/data/{doc} {
+      allow get, write: if space.size() >= 24;
+    }
+    match /spaces/{space}/photos/{doc} {
+      allow get, write: if space.size() >= 24;
+    }
+  }
+}</div><button class="btn soft" id="rulesCopy" style="padding:9px;font-size:14px">Скопировать правила</button></li>
+        <li>Шестерёнка вверху слева → <b>Project settings</b> (Настройки проекта) → внизу «Your apps» → значок <b>&lt;/&gt;</b> (Web) → любое имя → «Register app». Появится блок <i>firebaseConfig</i>: нужны две строки — <b>apiKey</b> (AIza…) и <b>projectId</b>.</li>
+        <li>В приложении: Настройки → Облачная синхронизация → вставьте Project ID и apiKey → «Создать общее хранилище».</li>
+        <li>«Отправить код на другое устройство» → на втором iPhone/iPad: Настройки → вставьте код → «Подключиться по коду».</li>
+      </ol>
+      <p><b>Как работает:</b> нажимайте ⟳ (вверху экрана) после изменений на одном устройстве и перед работой на другом. Синхронизируются все записи, расшифровки, фото чеков, список покупок, шаблоны, магазины, категории, валюта и бюджет. Тема и шрифт у каждого устройства свои. Если одну и ту же запись изменили на двух устройствах, сохранится вариант того, кто синхронизировал позже.</p>
+      <p><b>Бесплатно:</b> лимитов Firebase (десятки тысяч операций в день) для семьи хватает с огромным запасом.</p>
+      <p><b>Безопасность:</b> код подключения — это ключ к вашим данным. Отправляйте его только своим устройствам и близким, с кем ведёте общий список.</p></details>
     <details><summary>Аналитика и статистика</summary><p>Выберите День, Неделю, Месяц, Год или «Период» (любые даты с — по). Стрелки ‹ › листают периоды. Отметьте магазины, чтобы посчитать сумму только по ним. Касание сектора диаграммы или строки — сумма и доля; касание столбика — сумма за день или месяц. Под итогом — сравнение с прошлым периодом.</p></details>
     <details><summary>Выгрузка в Excel</summary><p>Внизу «Аналитики»: «Excel за выбранный период» (учитывает выбранные магазины) или «За всё время». Откроется меню «Поделиться» — можно отправить в мессенджер, на почту или сохранить в «Файлы». В файле листы: Итоги, Записи, По дням, По месяцам, Расшифровки.</p></details>
     <details><summary>Резервная копия — зачем и как</summary><p>Все данные хранятся <b>только на этом телефоне</b>, на сервере их нет. Архив — единственный способ не потерять их при поломке, смене телефона или случайном удалении.</p><p><b>Создать:</b> «Создать архив» → «Отправить / сохранить» → «Сохранить в Файлы» (лучше в iCloud Drive) или отправить себе в мессенджер. Делайте раз в неделю-две и обязательно перед обновлением iOS или сменой телефона.</p><p><b>Восстановить</b> (или перенести на другой телефон): «Загрузить резервную копию» → выберите файл .zip. Текущие данные заменятся данными из архива.</p></details>
@@ -241,9 +296,11 @@ details summary::-webkit-details-marker{display:none}
       <li><b>Не переименовывайте</b> репозиторий на GitHub и не меняйте логин — у приложения сменится адрес и оно откроется пустым.</li>
       <li><b>Не пользуйтесь</b> в режиме «Частный доступ» Safari — там ничего не сохраняется.</li>
       <li><b>Не забивайте память телефона до отказа</b> — при нехватке места iOS может удалять данные сайтов.</li>
+      <li><b>Не отправляйте код синхронизации посторонним</b> — с ним видны и изменяемы все ваши записи.</li>
+      <li>Синхронизация — не замена архиву: если удалить запись и синхронизировать, она удалится везде. Архив делайте всё равно.</li>
       <li>Обновлять файлы на GitHub <b>можно</b> — данные при этом сохраняются.</li></ul></details>
   </div>
-  <div class="card"><h2>О приложении</h2><div style="font-weight:600">Список покупок и учёт расходов</div><div class="muted">Версия 3.1 · © 2026 [Ваше имя]. Все права защищены.<br>Копирование, изменение и распространение без письменного разрешения автора запрещены.<br>Установка: Safari → «Поделиться» → «На экран Домой».</div></div>
+  <div class="card"><h2>О приложении</h2><div style="font-weight:600">Список покупок и учёт расходов</div><div class="muted">Версия 4 · © 2026 Elena Kirsanova. Все права защищены.<br>Копирование, изменение и распространение без письменного разрешения автора запрещены.<br>Установка: Safari → «Поделиться» → «На экран Домой».</div></div>
 </section>
 </main>
 
@@ -270,9 +327,10 @@ details summary::-webkit-details-marker{display:none}
   <div class="muted" style="margin-top:6px">Сохраняется текущий список покупок (без галочек и цен).</div>
   <button class="btn ghost" id="tplX">Закрыть</button>
 </div></div>
-<div class="modal" id="mPhoto"><div class="sheet" style="text-align:center">
-  <img id="phImg" alt="Фото чека" style="max-width:100%;max-height:68vh;border-radius:14px">
-  <button class="btn soft" id="phShare">Поделиться фото</button><button class="btn ghost" id="phX">Закрыть</button>
+<div class="modal" id="mPhoto"><div class="sheet">
+  <div id="phTitle" style="font-weight:600;text-align:center"></div>
+  <div id="phBox" class="phbox"></div>
+  <button class="btn" id="phAdd">📷 Добавить фото</button><button class="btn soft" id="phShare">Поделиться фото</button><button class="btn ghost" id="phX">Закрыть</button>
 </div></div>
 <div class="modal" id="mReady"><div class="sheet">
   <div id="readyTxt" style="white-space:pre-line;font-weight:600;text-align:center;font-size:18px"></div>
@@ -316,7 +374,7 @@ const OTHER='#9b9b9b';
 /* ---------- данные ---------- */
 function defaults(){return{items:[],draft:'',history:{},stores:['Супермаркет','Рынок','Аптека','Пекарня','Налоги','Медицина','Страховки','Обслуживание авто'],detailCats:['Налоги','Медицина','Страховки','Обслуживание авто'],templates:[],deptMem:{},cats:['Продукты','Бытовое','Здоровье','Транспорт','Дом и ЖКХ','Одежда','Дети','Развлечения','Налоги и страховки','Другое'],storeCat:{'Супермаркет':'Продукты','Рынок':'Продукты','Пекарня':'Продукты','Аптека':'Здоровье','Медицина':'Здоровье','Налоги':'Налоги и страховки','Страховки':'Налоги и страховки','Обслуживание авто':'Транспорт'},expenses:[],settings:{font:20,currency:'€',theme:'sea',budget:0,groupList:true,donutBy:'store'}}}
 function normalize(o){o=o||{};const r=Object.assign(defaults(),o);r.settings=Object.assign(defaults().settings,o.settings||{});
-  ['items','stores','expenses'].forEach(k=>{if(!Array.isArray(r[k]))r[k]=[]});if(!r.history||typeof r.history!=='object')r.history={};if(!Array.isArray(r.detailCats))r.detailCats=[];['templates','cats'].forEach(k=>{if(!Array.isArray(r[k]))r[k]=defaults()[k]});['deptMem','storeCat','history'].forEach(k=>{if(!r[k]||typeof r[k]!=='object')r[k]={}});
+  ['items','stores','expenses'].forEach(k=>{if(!Array.isArray(r[k]))r[k]=[]});if(!r.history||typeof r.history!=='object')r.history={};if(!Array.isArray(r.detailCats))r.detailCats=[];['templates','cats'].forEach(k=>{if(!Array.isArray(r[k]))r[k]=defaults()[k]});['deptMem','storeCat','history'].forEach(k=>{if(!r[k]||typeof r[k]!=='object')r[k]={}});r.expenses.forEach(x=>{if(x.photo&&!x.photos)x.photos=[x.photo];delete x.photo});
   if(!r.settings.v3){['Налоги','Медицина','Страховки','Обслуживание авто'].forEach(c=>{if(!r.stores.includes(c))r.stores.push(c);if(!r.detailCats.includes(c))r.detailCats.push(c)});r.settings.v3=1}
   return r}
 function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY)||'null'))}catch(e){return defaults()}}
@@ -510,9 +568,9 @@ function expRow(x,withActions){const r=el('div','exp');const nm=el('div','nm',x.
   if(x.cat)nm.firstChild.after(el('div','muted',x.cat));
   if(x.lines&&x.lines.length)nm.appendChild(el('div','muted',linesTxt(x)));
   r.append(nm,el('div','amt',money(x.amount)));
-  if(x.photo){const ph=el('button','x','🧾');ph.onclick=()=>viewPhoto(x.photo);r.appendChild(ph)}
+  {const n=photosOf(x).length;const ph=el('button','x',n?'🧾'+(n>1?n:''):'📷');ph.title=n?'Фото чека':'Добавить фото';ph.onclick=()=>n?viewPhotos(x):addPhotosTo(x);r.appendChild(ph)}
   if(withActions){const ed=el('button','x','✎'),del=el('button','x','✕');ed.onclick=()=>startEdit(x);
-    del.onclick=()=>{if(confirm(`Удалить запись?\n${x.store} — ${money(x.amount)}`)){S.expenses=S.expenses.filter(y=>y!==x);if(x.photo)IDB.del(x.photo).catch(()=>{});save();renderShop()}};r.append(ed,del)}
+    del.onclick=()=>{if(confirm(`Удалить запись?\n${x.store} — ${money(x.amount)}`)){S.expenses=S.expenses.filter(y=>y!==x);photosOf(x).forEach(id=>IDB.del(id).catch(()=>{}));save();renderShop()}};r.append(ed,del)}
   return r}
 let jCat=null;
 function renderJournal(){const dc=S.stores.filter(isDet).concat(S.detailCats.filter(c=>!S.stores.includes(c)&&S.expenses.some(x=>x.store===c)));
@@ -525,7 +583,7 @@ function renderJournal(){const dc=S.stores.filter(isDet).concat(S.detailCats.fil
   list.forEach(x=>{const h=el('div','dayh');h.append(el('span','',fmtD(x.date)+(x.km?' · '+Number(x.km).toLocaleString('ru-RU')+' км':'')),el('span','',money(x.amount)));box.appendChild(h);
     (x.lines&&x.lines.length?x.lines:[{name:x.note||'без расшифровки',price:''}]).forEach(l=>{const r=el('div','exp');r.append(el('div','nm',l.name||'—'),el('div','amt',l.price?money(l.price):''));box.appendChild(r)});
     if(x.lines&&x.lines.length&&x.note)box.appendChild(el('div','muted',x.note));
-    const ed=el('button','btn ghost','Изменить запись');ed.style.cssText='margin-top:6px;padding:8px;font-size:14px';ed.onclick=()=>startEdit(x);box.appendChild(ed)})}
+    const ed=el('button','btn ghost','Изменить запись');ed.style.cssText='margin-top:6px;padding:8px;font-size:14px';ed.onclick=()=>startEdit(x);const n=photosOf(x).length;const pb=el('button','btn ghost',n?'🧾 Фото ('+n+')':'📷 Добавить фото');pb.style.cssText=ed.style.cssText;pb.onclick=()=>n?viewPhotos(x):addPhotosTo(x);const g=el('div','grid2');g.append(ed,pb);box.appendChild(g)})}
 function renderShop(){
   if(selStore&&!S.stores.includes(selStore))selStore=null;renderChips();renderDet();renderCats();
   if(!$('eDate').value)$('eDate').value=today();
@@ -539,11 +597,11 @@ function renderShop(){
   renderJournal()}
 function startEdit(x){showTab('shop');editId=x.id;$('eDate').value=x.date;selStore=x.store;if(!S.stores.includes(x.store)){S.stores.push(x.store);save()}
   $('eAmt').value=String(x.amount).replace('.',',');$('eNote').value=x.note||'';$('eKm').value=x.km||'';
-  selCat=x.cat||null;photoState={blob:null,removed:false};showPhotoPrev(null);if(x.photo)IDB.get(x.photo).then(b=>{if(b&&editId===x.id)showPhotoPrev(b)}).catch(()=>{});
+  selCat=x.cat||null;photoState={keep:photosOf(x),add:[]};renderPhotoForm();
   lines=(x.lines||[]).map(l=>({name:l.name,price:String(l.price||'').replace('.',',')}));detOpen=lines.length>0||isDet(x.store);if(detOpen&&!lines.length)lines=[{name:'',price:''}];
   $('expTitle').textContent='Редактирование';$('eSave').textContent='Сохранить изменения';$('eCancel').style.display='block';
   renderChips();renderDet();renderCats();window.scrollTo({top:0,behavior:'smooth'})}
-function resetForm(){editId=null;selStore=null;selCat=null;lines=[];detOpen=false;photoState={blob:null,removed:false};if(typeof showPhotoPrev==='function')showPhotoPrev(null);$('eAmt').value='';$('eNote').value='';$('eKm').value='';
+function resetForm(){editId=null;selStore=null;selCat=null;lines=[];detOpen=false;photoState={keep:[],add:[]};renderPhotoForm();$('eAmt').value='';$('eNote').value='';$('eKm').value='';
   $('expTitle').textContent='Новая запись';$('eSave').textContent='Сохранить расход';$('eCancel').style.display='none';renderDet()}
 $('eCancel').onclick=()=>{resetForm();$('eDate').value=today();renderShop()};
 $('eSave').onclick=async()=>{let amt=num($('eAmt').value);
@@ -553,15 +611,15 @@ $('eSave').onclick=async()=>{let amt=num($('eAmt').value);
   const rec={date:$('eDate').value||today(),store:selStore,amount:r2(amt),note:$('eNote').value.trim()};
   if(ls.length)rec.lines=ls;const km=parseInt(($('eKm').value||'').replace(/\D/g,''));if(isAuto(selStore)&&km>0)rec.km=km;
   if(selCat){rec.cat=selCat;S.storeCat[selStore]=selCat}
-  const old=editId?S.expenses.find(x=>x.id===editId):null;let ph=old&&old.photo&&!photoState.removed&&!photoState.blob?old.photo:null;
-  if(photoState.blob){try{ph=uid();await IDB.put(ph,photoState.blob)}catch(e){ph=null;toast('Фото не сохранилось')}}
-  if(old&&old.photo&&old.photo!==ph)IDB.del(old.photo).catch(()=>{});
-  if(ph)rec.photo=ph;
-  if(old){['lines','km','cat','photo'].forEach(k=>delete old[k]);Object.assign(old,rec)}else S.expenses.push(Object.assign({id:uid()},rec));
+  const old=editId?S.expenses.find(x=>x.id===editId):null;const ids=[...photoState.keep];
+  for(const b of photoState.add){try{const id=uid();await IDB.put(id,b);ids.push(id)}catch(e){toast('Фото не сохранилось')}}
+  if(old)photosOf(old).filter(id=>!ids.includes(id)).forEach(id=>IDB.del(id).catch(()=>{}));
+  if(ids.length)rec.photos=ids;
+  if(old){['lines','km','cat','photo','photos'].forEach(k=>delete old[k]);Object.assign(old,rec)}else S.expenses.push(Object.assign({id:uid()},rec));
   save();resetForm();renderShop();toast('Сохранено');$('eAmt').blur()};
 
 /* ---------- настройки: магазины и статьи ---------- */
-function renderSettings(){renderThemes();renderCur();$('budget').value=S.settings.budget||'';renderStorage();renderCatSettings();
+function renderSettings(){renderSync();renderThemes();renderCur();$('budget').value=S.settings.budget||'';renderStorage();renderCatSettings();
   const sl=$('storeList');sl.innerHTML='';
   S.stores.forEach((s,i)=>{const r=el('div','exp');const dot=el('span','');dot.style.cssText=`width:11px;height:11px;border-radius:50%;flex:none;background:${storeColor(s)}`;
     const nm=el('div','nm',s);if(isDet(s))nm.appendChild(el('div','muted','с расшифровкой'));
@@ -594,6 +652,7 @@ async function renderStorage(){const box=$('stInfo');if(!box)return;
   box.innerHTML='';rows.forEach(([a,b])=>{const r=el('div','exp');r.append(el('div','nm',a),el('div','amt',b));r.firstChild.style.fontWeight='400';box.appendChild(r)});
   const tip=el('div','muted',pct>60?'⚠️ Хранилище заполнено больше чем наполовину — сделайте архив и удалите старые записи.':'Места достаточно: примерно 20–25 тысяч записей поместится без проблем.');tip.style.marginTop='8px';box.appendChild(tip)}
 $('stRefresh').onclick=renderStorage;
+$('rulesCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('rulesTxt').textContent);toast('Правила скопированы')}catch(e){toast('Выделите текст и скопируйте вручную')}};
 $('clrHist').onclick=()=>{if(confirm('Очистить подсказки «Часто покупаете»?')){S.history={};save();toast('Очищено')}};
 
 /* ---------- фото чеков (IndexedDB) ---------- */
@@ -603,18 +662,43 @@ const IDB={db:null,
   put(k,v){return this.tx('readwrite',s=>s.put(v,k))},get(k){return this.tx('readonly',s=>s.get(k))},del(k){return this.tx('readwrite',s=>s.delete(k))},clear(){return this.tx('readwrite',s=>s.clear())},
   async all(){const d=await this.open();return new Promise((res,rej)=>{const out=[];const t=d.transaction('p','readonly');const c=t.objectStore('p').openCursor();
     c.onsuccess=()=>{const cur=c.result;if(cur){out.push([cur.key,cur.value]);cur.continue()}};t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error)})}};
-let photoState={blob:null,removed:false},photoUrl=null;
-async function compressImg(file){const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();
-  const k=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
-  c.getContext('2d').drawImage(img,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(r,'image/jpeg',.72))}finally{URL.revokeObjectURL(url)}}
-function showPhotoPrev(blob){if(photoUrl)URL.revokeObjectURL(photoUrl);photoUrl=blob?URL.createObjectURL(blob):null;
-  $('photoPrev').style.display=blob?'block':'none';$('photoBtn').textContent=blob?'📷 Заменить фото чека':'📷 Добавить фото чека';if(blob)$('photoImg').src=photoUrl}
+let photoState={keep:[],add:[]},thumbUrls=[];
+async function compressImg(file,max=1400,q=.72){const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();
+  const k=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(r,'image/jpeg',q))}finally{URL.revokeObjectURL(url)}}
+const photosOf=x=>x.photos?[...x.photos]:(x.photo?[x.photo]:[]);
+function renderPhotoForm(){thumbUrls.forEach(u=>URL.revokeObjectURL(u));thumbUrls=[];const box=$('photoPrev');box.innerHTML='';
+  const all=[...photoState.keep.map(id=>({id})),...photoState.add.map(b=>({b}))];
+  box.style.display=all.length?'grid':'none';
+  all.forEach(p=>{const w=el('div','thumb');const img=el('img');img.alt='';
+    if(p.b){const u=URL.createObjectURL(p.b);thumbUrls.push(u);img.src=u}
+    else IDB.get(p.id).then(b=>{if(b){const u=URL.createObjectURL(b);thumbUrls.push(u);img.src=u}}).catch(()=>{});
+    const x=el('button','x','✕');x.onclick=()=>{if(p.b)photoState.add.splice(photoState.add.indexOf(p.b),1);else photoState.keep=photoState.keep.filter(k=>k!==p.id);renderPhotoForm()};
+    w.append(img,x);box.appendChild(w)});
+  $('photoBtn').textContent=all.length?'📷 Добавить ещё фото':'📷 Добавить фото чека'}
+async function filesToBlobs(files){const out=[];for(const f of files){try{out.push(await compressImg(f))}catch(e){toast('Не удалось открыть фото')}}return out}
 $('photoBtn').onclick=()=>$('photoIn').click();
-$('photoIn').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const b=await compressImg(f);photoState={blob:b,removed:false};showPhotoPrev(b)}catch(err){toast('Не удалось открыть фото')}};
-$('photoDel').onclick=()=>{photoState={blob:null,removed:true};showPhotoPrev(null)};
-let viewBlob=null;
-async function viewPhoto(id){try{const b=await IDB.get(id);if(!b)return toast('Фото не найдено');viewBlob=b;$('phImg').src=URL.createObjectURL(b);$('mPhoto').classList.add('on')}catch(e){toast('Не удалось открыть фото')}}
-$('phShare').onclick=()=>{if(viewBlob)shareBlob(viewBlob,'чек_'+today()+'.jpg')};
+$('photoIn').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;photoState.add.push(...await filesToBlobs(fs));renderPhotoForm()};
+/* фото прямо к уже сохранённой записи */
+let photoTarget=null;
+function addPhotosTo(x){photoTarget=x;$('photoQuick').click()}
+$('photoQuick').onchange=async e=>{const fs=[...e.target.files];e.target.value='';const x=photoTarget;if(!fs.length||!x)return;
+  const bl=await filesToBlobs(fs);const ids=photosOf(x);let n=0;
+  for(const b of bl){const id=uid();try{await IDB.put(id,b);ids.push(id);n++}catch(err){toast('Фото не сохранилось')}}
+  delete x.photo;if(ids.length)x.photos=ids;save();rerender();if(n)toast('Фото добавлено: '+n)};
+let viewBlobs=[],viewUrls=[],viewRec=null;
+async function viewPhotos(x){viewRec=x;const ids=photosOf(x);viewUrls.forEach(u=>URL.revokeObjectURL(u));viewUrls=[];viewBlobs=[];const box=$('phBox');box.innerHTML='';
+  $('phTitle').textContent=x.store+' · '+fmtD(x.date)+' · '+money(x.amount);
+  for(const id of ids){try{const b=await IDB.get(id);
+    if(b){viewBlobs.push(b);const u=URL.createObjectURL(b);viewUrls.push(u);const w=el('div','thumb big');const img=el('img');img.src=u;img.alt='Фото чека';
+      const d=el('button','x','✕');d.onclick=()=>{if(!confirm('Удалить это фото?'))return;x.photos=photosOf(x).filter(k=>k!==id);delete x.photo;if(!x.photos.length)delete x.photos;
+        IDB.del(id).catch(()=>{});save();rerender();viewPhotos(x)};w.append(img,d);box.appendChild(w)}
+    else box.appendChild(el('div','muted','Фото есть на другом устройстве — нажмите «Синхронизировать»'))}catch(e){}}
+  if(!ids.length)box.appendChild(el('div','empty','Фото нет'));
+  $('mPhoto').classList.add('on')}
+$('phAdd').onclick=()=>{$('mPhoto').classList.remove('on');if(viewRec)addPhotosTo(viewRec)};
+$('phShare').onclick=async()=>{if(!viewBlobs.length)return toast('Нет фото');const files=viewBlobs.map((b,i)=>new File([b],`чек_${i+1}.jpg`,{type:'image/jpeg'}));
+  if(navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files})}catch(e){}}else download(viewBlobs[0],'чек.jpg')};
 $('phX').onclick=()=>$('mPhoto').classList.remove('on');
 
 /* ---------- категории расходов ---------- */
@@ -632,6 +716,128 @@ function renderCatSettings(){const box=$('catList');box.innerHTML='';
 function addCat(){const v=$('newCat').value.trim();if(!v)return;if(S.cats.includes(v))return toast('Такая категория уже есть');S.cats.push(v);$('newCat').value='';save();renderCatSettings()}
 $('addCat').onclick=addCat;$('newCat').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addCat()}};
 document.querySelectorAll('#byseg button').forEach(b=>b.onclick=()=>{S.settings.donutBy=b.dataset.b;save();renderStats()});
+
+/* ---------- облачная синхронизация (Google Firebase · Firestore) ---------- */
+const SKEY='magazin_sync_v1',BKEY='magazin_sync_base_v1';
+const getJ=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}};
+const syncCfg=()=>getJ(SKEY);
+function stable(o){if(Array.isArray(o))return'['+o.map(stable).join(',')+']';if(o&&typeof o==='object')return'{'+Object.keys(o).sort().map(k=>JSON.stringify(k)+':'+stable(o[k])).join(',')+'}';return JSON.stringify(o)}
+function H(o){const s=stable(o);let h1=0xdeadbeef,h2=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(h2>>>0).toString(36)+(h1>>>0).toString(36)}
+const fsUrl=(c,p)=>`https://firestore.googleapis.com/v1/projects/${encodeURIComponent(c.projectId)}/databases/(default)/documents/spaces/${c.space}/${p}?key=${encodeURIComponent(c.apiKey)}`;
+async function fsErr(r){let m='';try{const j=await r.json();m=(j.error&&j.error.message)||(j[0]&&j[0].error&&j[0].error.message)||''}catch(e){}
+  if(r.status===403)return'нет доступа — проверьте правила Firestore (шаг 4 инструкции) и ключ API';
+  if(r.status===400&&/api key/i.test(m))return'неверный ключ API (apiKey)';
+  if(r.status===404)return'проект не найден — проверьте Project ID и что база Firestore создана';
+  return'ошибка '+r.status+(m?': '+m:'')}
+async function fsGet(c,p){let r;try{r=await fetch(fsUrl(c,p),{cache:'no-store'})}catch(e){throw new Error('нет интернета')}
+  if(r.status===404){let m='';try{m=((await r.json()).error||{}).message||''}catch(e){}
+    if(/database|project/i.test(m))throw new Error('проект или база Firestore не найдены — проверьте Project ID и шаг 3 инструкции');return null}
+  if(!r.ok)throw new Error(await fsErr(r));const j=await r.json();return j.fields&&j.fields.v?j.fields.v.stringValue:null}
+async function fsPut(c,p,str){let r;try{r=await fetch(fsUrl(c,p),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{v:{stringValue:str}}})})}catch(e){throw new Error('нет интернета')}
+  if(!r.ok)throw new Error(await fsErr(r))}
+async function fsDel(c,p){try{const r=await fetch(fsUrl(c,p),{method:'DELETE'});return r.ok||r.status===404}catch(e){return false}}
+const blobToData=b=>new Promise((res,rej)=>{const f=new FileReader();f.onload=()=>res(f.result);f.onerror=()=>rej(f.error);f.readAsDataURL(b)});
+async function dataToBlob(d){return await(await fetch(d)).blob()}
+// общие (синхронизируемые) настройки; тема и шрифт у каждого устройства свои
+const BLOBS={
+  stores:{get:()=>S.stores,set:v=>S.stores=v,kind:'list'},
+  detailCats:{get:()=>S.detailCats,set:v=>S.detailCats=v,kind:'list'},
+  cats:{get:()=>S.cats,set:v=>S.cats=v,kind:'list'},
+  storeCat:{get:()=>S.storeCat,set:v=>S.storeCat=v,kind:'obj'},
+  templates:{get:()=>S.templates,set:v=>S.templates=v,kind:'tpl'},
+  history:{get:()=>S.history,set:v=>S.history=v,kind:'obj'},
+  deptMem:{get:()=>S.deptMem,set:v=>S.deptMem=v,kind:'obj'},
+  shared:{get:()=>({currency:S.settings.currency,budget:S.settings.budget||0}),set:v=>{if(v.currency)S.settings.currency=v.currency;S.settings.budget=v.budget||0},kind:'obj'}};
+function mergeBoth(kind,L,R){if(kind==='list')return[...L,...R.filter(x=>!L.includes(x))];
+  if(kind==='tpl'){const n=new Set(L.map(t=>t.name));return[...L,...R.filter(t=>!n.has(t.name))]}return Object.assign({},R,L)}
+// трёхстороннее слияние: base — состояние после прошлой синхронизации
+function merge3(L,R,B,first){const out={};const ids=new Set([...Object.keys(L),...Object.keys(R),...Object.keys(B)]);
+  for(const id of ids){const b=B[id]||'NONE';const hL=L[id]?H(L[id]):(B[id]?'DEL':'NONE');const hR=R[id]?(R[id]==='DEL'?'DEL':H(R[id])):(B[id]?'DEL':'NONE');
+    const lc=hL!==b,rc=hR!==b;const useR=rc&&(!lc||first);
+    const v=useR?(R[id]==='DEL'||!R[id]?'DEL':R[id]):(L[id]||(hL==='DEL'?'DEL':null));
+    if(v&&!(v==='DEL'&&b==='NONE'&&hR==='NONE'))out[id]=v}
+  return out}
+let syncing=false;
+async function doSync(){const c=syncCfg();if(!c)return toast('Сначала настройте синхронизацию в Настройках');if(syncing)return;syncing=true;
+  const btns=[$('hSync'),$('syBtn')];btns.forEach(b=>b&&b.classList.add('busy'));$('hSync').classList.add('spin');
+  try{const res=await runSync(c);
+    localStorage.setItem(SKEY,JSON.stringify(Object.assign(c,{last:Date.now(),lastRes:res})));
+    toast(`Синхронизировано ✓ отправлено ${res.up}, получено ${res.down}`)}
+  catch(e){alert('Синхронизация не удалась: '+e.message)}
+  finally{syncing=false;btns.forEach(b=>b&&b.classList.remove('busy'));$('hSync').classList.remove('spin');rerender();renderSync()}}
+async function runSync(c){
+  const base=getJ(BKEY);const first=!base||base.space!==c.space;const B=first?{exp:{},items:{},blobs:{}}:base;
+  let up=0,down=0;const now=Date.now(),cutoff=now-400*864e5;
+  // 1. читаем облако
+  const metaS=await fsGet(c,'data/meta');const meta=metaS?JSON.parse(metaS):{v:1,blobs:{},years:[],photos:[],etomb:{},itomb:{}};
+  const yearDocs={};for(const y of meta.years||[]){const s=await fsGet(c,'data/exp_'+y);yearDocs[y]=s||'{}'}
+  const itemsS=await fsGet(c,'data/items');const itemsDoc=itemsS?JSON.parse(itemsS):{recs:{},order:[]};
+  // 2. расходы
+  const Rexp={};Object.values(yearDocs).forEach(s=>Object.assign(Rexp,JSON.parse(s)));Object.keys(meta.etomb||{}).forEach(id=>{if(!Rexp[id])Rexp[id]='DEL'});
+  const Lexp={};S.expenses.forEach(x=>{Lexp[x.id]=x});
+  const fe=merge3(Lexp,Rexp,B.exp,first);
+  const newExp=[],etomb={};Object.entries(fe).forEach(([id,v])=>{if(v==='DEL')etomb[id]=(meta.etomb||{})[id]||now;else newExp.push(v)});
+  Object.keys(etomb).forEach(id=>{if(etomb[id]<cutoff)delete etomb[id]});
+  newExp.forEach(x=>{if(!Lexp[x.id]||H(Lexp[x.id])!==H(x))down++});
+  // 3. список покупок
+  const Rit=Object.assign({},itemsDoc.recs);Object.keys(meta.itomb||{}).forEach(id=>{if(!Rit[id])Rit[id]='DEL'});
+  const Lit={};S.items.forEach(i=>{Lit[i.id]=i});
+  const fi=merge3(Lit,Rit,B.items,first);const itomb={};
+  Object.entries(fi).forEach(([id,v])=>{if(v==='DEL')itomb[id]=(meta.itomb||{})[id]||now});Object.keys(itomb).forEach(id=>{if(itomb[id]<cutoff)delete itomb[id]});
+  const order=[...S.items.map(i=>i.id),...(itemsDoc.order||[]).filter(id=>!Lit[id])].filter((id,k,a)=>fi[id]&&fi[id]!=='DEL'&&a.indexOf(id)===k);
+  Object.keys(fi).forEach(id=>{if(fi[id]!=='DEL'&&!order.includes(id))order.push(id)});
+  const newItems=order.map(id=>fi[id]);newItems.forEach(i=>{if(!Lit[i.id]||H(Lit[i.id])!==H(i))down++});
+  // 4. настройки-списки
+  const newBlobs={},bb={};
+  for(const[k,d]of Object.entries(BLOBS)){const L=JSON.parse(JSON.stringify(d.get()));const R=meta.blobs?meta.blobs[k]:undefined;const b=B.blobs[k];
+    const lc=H(L)!==b,rc=R!==undefined&&H(R)!==b;let v=L;
+    if(R!==undefined){if(rc&&!lc)v=R;else if(rc&&lc)v=first&&d.kind==='obj'?Object.assign({},L,R):mergeBoth(d.kind,L,R)}
+    newBlobs[k]=v;bb[k]=H(v);if(H(v)!==H(L)){d.set(JSON.parse(JSON.stringify(v)));down++}}
+  // 5. фото: скачать недостающие, загрузить новые, удалить ненужные
+  const need=new Set();newExp.forEach(x=>photosOf(x).forEach(id=>need.add(id)));
+  const local=new Set();try{(await IDB.all()).forEach(([k])=>local.add(k))}catch(e){}
+  const remote=new Set(meta.photos||[]);
+  for(const id of need){
+    if(!local.has(id)&&remote.has(id)){const s=await fsGet(c,'photos/'+id);if(s){await IDB.put(id,await dataToBlob(s));down++}}
+    else if(local.has(id)&&!remote.has(id)){let b=await IDB.get(id);let d=await blobToData(b);
+      if(d.length>990000){b=await compressImg(b,1000,.6);d=await blobToData(b)}
+      if(d.length<=1040000){await fsPut(c,'photos/'+id,d);remote.add(id);up++}}}
+  for(const id of [...remote])if(!need.has(id)){if(await fsDel(c,'photos/'+id))remote.delete(id)}
+  // 6. записываем изменения в облако
+  const diff=(f,R)=>Object.entries(f).filter(([id,v])=>(v==='DEL'?'DEL':H(v))!==(R[id]===undefined?'DEL':R[id]==='DEL'?'DEL':H(R[id]))).length;
+  up+=diff(fe,Rexp)+diff(fi,Rit);
+  const years={};newExp.forEach(x=>{const y=x.date.slice(0,4);(years[y]=years[y]||{})[x.id]=x});
+  const allY=new Set([...Object.keys(years),...(meta.years||[])]);
+  for(const y of allY){const s=stable(years[y]||{});if(s!==stable(JSON.parse(yearDocs[y]||'{}')))await fsPut(c,'data/exp_'+y,s)}
+  const recs={};newItems.forEach(i=>{recs[i.id]=i});const itemsNew=stable({recs,order});
+  if(itemsNew!==stable(itemsDoc))await fsPut(c,'data/items',itemsNew)
+  const metaNew={v:1,blobs:newBlobs,years:[...allY].filter(y=>years[y]).sort(),photos:[...remote],etomb,itomb};
+  if(stable(metaNew)!==stable(meta))await fsPut(c,'data/meta',stable(metaNew));
+  // 7. применяем у себя и запоминаем базу
+  S.expenses=newExp;S.items=newItems;save();
+  const be={};Object.entries(fe).forEach(([id,v])=>{be[id]=v==='DEL'?'DEL':H(v)});
+  const bi={};Object.entries(fi).forEach(([id,v])=>{bi[id]=v==='DEL'?'DEL':H(v)});
+  localStorage.setItem(BKEY,JSON.stringify({space:c.space,exp:be,items:bi,blobs:bb}));
+  return{up,down}}
+function makeCode(c){return'SYNC1:'+btoa(unescape(encodeURIComponent(JSON.stringify({p:c.projectId,k:c.apiKey,s:c.space}))))}
+function readCode(t){const m=(t||'').match(/SYNC1:([A-Za-z0-9+/=]+)/);if(!m)return null;try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1]))));return o.p&&o.k&&o.s?{projectId:o.p,apiKey:o.k,space:o.s}:null}catch(e){return null}}
+function newSpace(){const a=new Uint8Array(24);crypto.getRandomValues(a);return[...a].map(b=>'abcdefghijkmnpqrstuvwxyz23456789'[b%32]).join('')}
+function renderSync(){const c=syncCfg();$('hSync').style.display=c?'flex':'none';$('syOff').style.display=c?'none':'block';$('syOn').style.display=c?'block':'none';
+  if(c){$('syProj').textContent=c.projectId;
+    $('syStat').textContent=c.last?'Последняя синхронизация: '+new Date(c.last).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+(c.lastRes?` · отправлено ${c.lastRes.up}, получено ${c.lastRes.down}`:''):'Ещё не синхронизировалось — нажмите «Синхронизировать»'}}
+$('hSync').onclick=doSync;$('syBtn').onclick=doSync;
+$('syCreate').onclick=()=>{const p=$('syPid').value.trim(),k=$('syKey').value.trim();
+  if(!/^[a-z0-9-]{4,}$/.test(p))return toast('Проверьте Project ID (маленькие латинские буквы, цифры и дефис)');if(!/^AIza[0-9A-Za-z_-]{20,}$/.test(k))return toast('Ключ API должен начинаться с AIza…');
+  localStorage.setItem(SKEY,JSON.stringify({projectId:p,apiKey:k,space:newSpace()}));localStorage.removeItem(BKEY);renderSync();doSync()};
+$('syJoin').onclick=()=>{const c=readCode($('syCode').value);if(!c)return toast('Код не распознан — вставьте его целиком, начиная с SYNC1:');
+  if(!confirm('Подключиться к общему хранилищу?\nВаши записи на этом устройстве объединятся с записями из облака.'))return;
+  localStorage.setItem(SKEY,JSON.stringify(c));localStorage.removeItem(BKEY);$('syCode').value='';renderSync();doSync()};
+$('syShare').onclick=async()=>{const c=syncCfg();if(!c)return;const text='Код подключения к приложению «Список покупок и учёт расходов».\nОткройте приложение → Настройки → Облачная синхронизация → «Подключиться по коду» и вставьте:\n\n'+makeCode(c);
+  if(navigator.share){try{await navigator.share({text})}catch(e){}}else{try{await navigator.clipboard.writeText(text);toast('Код скопирован')}catch(e){prompt('Скопируйте код:',makeCode(c))}}};
+$('syCopy').onclick=async()=>{const c=syncCfg();if(!c)return;try{await navigator.clipboard.writeText(makeCode(c));toast('Код скопирован')}catch(e){prompt('Скопируйте код:',makeCode(c))}};
+$('syPaste').onclick=async()=>{try{$('syCode').value=await navigator.clipboard.readText()}catch(e){toast('Нажмите в поле и выберите «Вставить»')}};
+$('syLeave').onclick=()=>{if(!confirm('Отключить синхронизацию на этом устройстве?\nДанные на телефоне останутся, в облаке тоже.'))return;localStorage.removeItem(SKEY);localStorage.removeItem(BKEY);renderSync();toast('Синхронизация отключена')};
 
 /* ---------- аналитика ---------- */
 let aPer='month',anchor=new Date(),aStores=new Set();
@@ -805,7 +1011,7 @@ $('bkFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f
   catch(err){alert('Не удалось загрузить: '+err.message)}};
 
 /* ---------- запуск ---------- */
-function applyAll(){applyFont();applyTheme();$('draft').value=S.draft||'';$('eDate').value=today();resetForm();rerender()}
+function applyAll(){renderSync();applyFont();applyTheme();$('draft').value=S.draft||'';$('eDate').value=today();resetForm();rerender()}
 applyAll();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
