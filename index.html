@@ -122,8 +122,12 @@ details summary::-webkit-details-marker{display:none}
 #photoPrev{grid-template-columns:repeat(3,1fr);gap:8px}
 .thumb{position:relative}.thumb img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
 .thumb.big img{aspect-ratio:auto;object-fit:contain}
+.thumb .num{position:absolute;left:6px;top:6px;background:var(--acc);color:var(--on);border-radius:10px;font-size:12px;font-weight:600;padding:2px 7px}
+.thumb .mv{position:absolute;left:6px;bottom:6px;border:0;background:var(--card);color:var(--acc);border-radius:50%;width:30px;height:30px;font-size:18px;line-height:1}
+.thumb.big{border:1px solid var(--line);border-radius:14px;padding:4px;min-height:60px}
 .thumb .x{position:absolute;top:6px;right:6px;background:var(--card);border-radius:50%;opacity:1;padding:3px 8px;font-size:14px}
-.phbox{max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.phbox{max-height:62vh;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.phbox>*{flex:none}
 .steps{padding-left:20px;margin:8px 0 0;font-size:15px;line-height:1.45}.steps li{margin-bottom:8px}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--soft);padding:10px;border-radius:10px;white-space:pre;overflow-x:auto;margin-top:6px}
 .preview{margin-top:8px;padding:12px;border-radius:14px;background:var(--soft);font-weight:500}
@@ -177,7 +181,11 @@ details summary::-webkit-details-marker{display:none}
     <input id="eAmt" inputmode="decimal" placeholder="Сумма" style="margin-top:14px;font-size:1.35em;font-weight:600">
     <input id="eNote" placeholder="Комментарий (необязательно)" style="margin-top:8px">
     <div class="muted" style="margin:14px 0 8px">Категория (необязательно)</div><div class="chips" id="eCats"></div>
-    <button class="btn ghost" id="photoBtn" style="padding:10px;font-size:15px;margin-top:14px">📷 Добавить фото чека</button><input type="file" id="photoIn" accept="image/*" multiple hidden><input type="file" id="photoQuick" accept="image/*" multiple hidden>
+    <div class="muted" style="margin:14px 0 6px">Фото чека</div>
+    <div class="grid2"><button class="btn soft" id="photoCamBtn" style="padding:11px;font-size:15px">📷 Снять чек</button><button class="btn ghost" id="photoBtn" style="padding:11px;font-size:15px">🖼 Из галереи</button></div>
+    <input type="file" id="photoCam" accept="image/*" capture="environment" hidden><input type="file" id="photoIn" accept="image/*" multiple hidden>
+    <input type="file" id="photoQuickCam" accept="image/*" capture="environment" hidden><input type="file" id="photoQuick" accept="image/*" multiple hidden>
+    <div class="muted" id="photoCnt" style="margin-top:6px"></div>
     <div id="photoPrev" style="display:none;margin-top:8px"></div>
     <button class="btn" id="eSave">Сохранить расход</button>
     <button class="btn ghost" id="eCancel" style="display:none">Отменить редактирование</button>
@@ -261,7 +269,7 @@ details summary::-webkit-details-marker{display:none}
     <details><summary>Отделы, цены и корзина</summary><p>Продукты сами раскладываются по отделам магазина (овощи, молочное, бакалея…) — кнопка «По отделам» включает и выключает группировку. Нажмите ⋯ у продукта: можно исправить название, вписать цену и сменить отдел — приложение запомнит отдел для этого продукта.</p><p>Если цены вписаны, вверху видно «В корзине» (отмеченное) и сумму всего списка. Кнопка «Записать купленное в расходы» переносит отмеченные продукты в новую запись расхода с расшифровкой — останется выбрать магазин.</p></details>
     <details><summary>Шаблоны списков</summary><p>Составьте частый список → «Шаблоны списков» → впишите название → «+». Потом одно касание «Добавить» — и продукты в списке (без повторов).</p></details>
     <details><summary>Категории и фото чеков</summary><p>При записи расхода можно выбрать категорию (Продукты, Транспорт, Дом и ЖКХ…). Для каждого магазина категория запоминается. В «Аналитике» переключатель «Категории» показывает расходы по категориям. Список категорий меняется в Настройках.</p><p>«Фото чека» — снимок сохраняется к записи (значок 🧾 открывает его). Фото хранятся на телефоне и входят в архив.</p></details>
-    <details><summary>Фото к сохранённым записям</summary><p>У каждой записи в «Последних записях» и в «Журнале» есть значок: 📷 — добавить фото (можно сразу несколько), 🧾 — открыть фото (цифра — сколько их). В просмотре можно добавить ещё, поделиться или удалить отдельное фото. Через ✎ можно изменить всё в записи, включая фото.</p></details>
+    <details><summary>Фото к сохранённым записям</summary><p><b>Длинный чек</b> снимайте по частям сверху вниз: «📷 Снять чек» → снимок → «📷 Снять следующую часть» → и так до конца. Части нумеруются; стрелка ‹ / ↑ меняет порядок, ✕ удаляет часть. «🖼 Из галереи» добавляет сразу несколько готовых снимков.</p><p><b>К уже сохранённой записи:</b> нажмите 📷 (или 🧾 с цифрой — если фото уже есть) у записи в «Последних записях» или «Журнале» → откроется окно с частями чека, там же «Снять следующую часть» и «Из галереи». Через ✎ можно изменить всю запись, включая фото.</p></details>
     <details><summary>☁️ Синхронизация между устройствами — настройка</summary>
       <p>Данные хранятся в вашем личном бесплатном облаке Google Firebase. Настраивается один раз (~10 минут), удобнее с компьютера или iPad.</p>
       <ol class="steps">
@@ -300,7 +308,7 @@ service cloud.firestore {
       <li>Синхронизация — не замена архиву: если удалить запись и синхронизировать, она удалится везде. Архив делайте всё равно.</li>
       <li>Обновлять файлы на GitHub <b>можно</b> — данные при этом сохраняются.</li></ul></details>
   </div>
-  <div class="card"><h2>О приложении</h2><div style="font-weight:600">Список покупок и учёт расходов</div><div class="muted">Версия 4 · © 2026 Elena Kirsanova. Все права защищены.<br>Копирование, изменение и распространение без письменного разрешения автора запрещены.<br>Установка: Safari → «Поделиться» → «На экран Домой».</div></div>
+  <div class="card"><h2>О приложении</h2><div style="font-weight:600">Список покупок и учёт расходов</div><div class="muted">Версия 4.1 · © 2026 Elena Kirsanova. Все права защищены.<br>Копирование, изменение и распространение без письменного разрешения автора запрещены.<br>Установка: Safari → «Поделиться» → «На экран Домой».</div></div>
 </section>
 </main>
 
@@ -328,9 +336,10 @@ service cloud.firestore {
   <button class="btn ghost" id="tplX">Закрыть</button>
 </div></div>
 <div class="modal" id="mPhoto"><div class="sheet">
-  <div id="phTitle" style="font-weight:600;text-align:center"></div>
+  <div id="phTitle" style="font-weight:600;text-align:center"></div><div class="muted center" id="phSub" style="margin-top:2px"></div>
   <div id="phBox" class="phbox"></div>
-  <button class="btn" id="phAdd">📷 Добавить фото</button><button class="btn soft" id="phShare">Поделиться фото</button><button class="btn ghost" id="phX">Закрыть</button>
+  <div class="grid2" style="margin-top:10px"><button class="btn" id="phCam">📷 Снять следующую часть</button><button class="btn soft" id="phAdd">🖼 Из галереи</button></div>
+  <button class="btn soft" id="phShare">Поделиться фото</button><button class="btn ghost" id="phX">Закрыть</button>
 </div></div>
 <div class="modal" id="mReady"><div class="sheet">
   <div id="readyTxt" style="white-space:pre-line;font-weight:600;text-align:center;font-size:18px"></div>
@@ -568,7 +577,7 @@ function expRow(x,withActions){const r=el('div','exp');const nm=el('div','nm',x.
   if(x.cat)nm.firstChild.after(el('div','muted',x.cat));
   if(x.lines&&x.lines.length)nm.appendChild(el('div','muted',linesTxt(x)));
   r.append(nm,el('div','amt',money(x.amount)));
-  {const n=photosOf(x).length;const ph=el('button','x',n?'🧾'+(n>1?n:''):'📷');ph.title=n?'Фото чека':'Добавить фото';ph.onclick=()=>n?viewPhotos(x):addPhotosTo(x);r.appendChild(ph)}
+  {const n=photosOf(x).length;const ph=el('button','x',n?'🧾'+(n>1?n:''):'📷');ph.title=n?'Фото чека':'Добавить фото';ph.onclick=()=>viewPhotos(x);r.appendChild(ph)}
   if(withActions){const ed=el('button','x','✎'),del=el('button','x','✕');ed.onclick=()=>startEdit(x);
     del.onclick=()=>{if(confirm(`Удалить запись?\n${x.store} — ${money(x.amount)}`)){S.expenses=S.expenses.filter(y=>y!==x);photosOf(x).forEach(id=>IDB.del(id).catch(()=>{}));save();renderShop()}};r.append(ed,del)}
   return r}
@@ -583,7 +592,7 @@ function renderJournal(){const dc=S.stores.filter(isDet).concat(S.detailCats.fil
   list.forEach(x=>{const h=el('div','dayh');h.append(el('span','',fmtD(x.date)+(x.km?' · '+Number(x.km).toLocaleString('ru-RU')+' км':'')),el('span','',money(x.amount)));box.appendChild(h);
     (x.lines&&x.lines.length?x.lines:[{name:x.note||'без расшифровки',price:''}]).forEach(l=>{const r=el('div','exp');r.append(el('div','nm',l.name||'—'),el('div','amt',l.price?money(l.price):''));box.appendChild(r)});
     if(x.lines&&x.lines.length&&x.note)box.appendChild(el('div','muted',x.note));
-    const ed=el('button','btn ghost','Изменить запись');ed.style.cssText='margin-top:6px;padding:8px;font-size:14px';ed.onclick=()=>startEdit(x);const n=photosOf(x).length;const pb=el('button','btn ghost',n?'🧾 Фото ('+n+')':'📷 Добавить фото');pb.style.cssText=ed.style.cssText;pb.onclick=()=>n?viewPhotos(x):addPhotosTo(x);const g=el('div','grid2');g.append(ed,pb);box.appendChild(g)})}
+    const ed=el('button','btn ghost','Изменить запись');ed.style.cssText='margin-top:6px;padding:8px;font-size:14px';ed.onclick=()=>startEdit(x);const n=photosOf(x).length;const pb=el('button','btn ghost',n?'🧾 Фото ('+n+')':'📷 Добавить фото');pb.style.cssText=ed.style.cssText;pb.onclick=()=>viewPhotos(x);const g=el('div','grid2');g.append(ed,pb);box.appendChild(g)})}
 function renderShop(){
   if(selStore&&!S.stores.includes(selStore))selStore=null;renderChips();renderDet();renderCats();
   if(!$('eDate').value)$('eDate').value=today();
@@ -663,41 +672,60 @@ const IDB={db:null,
   async all(){const d=await this.open();return new Promise((res,rej)=>{const out=[];const t=d.transaction('p','readonly');const c=t.objectStore('p').openCursor();
     c.onsuccess=()=>{const cur=c.result;if(cur){out.push([cur.key,cur.value]);cur.continue()}};t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error)})}};
 let photoState={keep:[],add:[]},thumbUrls=[];
-async function compressImg(file,max=1400,q=.72){const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();
-  const k=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
+// длинные чеки снимаем в большем разрешении, чтобы читался мелкий текст
+async function compressImg(file,max,q=.75){const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();
+  const w=img.naturalWidth,h=img.naturalHeight,ratio=Math.max(w,h)/Math.min(w,h);if(!max)max=ratio>1.8?2400:1700;
+  const k=Math.min(1,max/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
   c.getContext('2d').drawImage(img,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(r,'image/jpeg',q))}finally{URL.revokeObjectURL(url)}}
 const photosOf=x=>x.photos?[...x.photos]:(x.photo?[x.photo]:[]);
+// форма записи: несколько частей чека, с порядком
 function renderPhotoForm(){thumbUrls.forEach(u=>URL.revokeObjectURL(u));thumbUrls=[];const box=$('photoPrev');box.innerHTML='';
   const all=[...photoState.keep.map(id=>({id})),...photoState.add.map(b=>({b}))];
   box.style.display=all.length?'grid':'none';
-  all.forEach(p=>{const w=el('div','thumb');const img=el('img');img.alt='';
+  all.forEach((p,i)=>{const w=el('div','thumb');const img=el('img');img.alt='Часть '+(i+1);
     if(p.b){const u=URL.createObjectURL(p.b);thumbUrls.push(u);img.src=u}
     else IDB.get(p.id).then(b=>{if(b){const u=URL.createObjectURL(b);thumbUrls.push(u);img.src=u}}).catch(()=>{});
+    const n=el('span','num',String(i+1));
     const x=el('button','x','✕');x.onclick=()=>{if(p.b)photoState.add.splice(photoState.add.indexOf(p.b),1);else photoState.keep=photoState.keep.filter(k=>k!==p.id);renderPhotoForm()};
-    w.append(img,x);box.appendChild(w)});
-  $('photoBtn').textContent=all.length?'📷 Добавить ещё фото':'📷 Добавить фото чека'}
+    w.append(img,n,x);
+    if(i>0){const l=el('button','mv','‹');l.onclick=()=>{movePart(i,-1)};w.appendChild(l)}
+    box.appendChild(w)});
+  $('photoCnt').textContent=all.length?`Фото чека: ${all.length} ${plural(all.length,'часть','части','частей')}. Длинный чек снимайте по частям сверху вниз, ‹ меняет порядок.`:'';
+  $('photoCamBtn').textContent=all.length?'📷 Снять следующую часть':'📷 Снять чек';
+  $('photoBtn').textContent=all.length?'🖼 Ещё из галереи':'🖼 Из галереи'}
+function movePart(i,d){// единый порядок: сначала сохранённые, затем новые — переводим в общий список и обратно
+  const all=[...photoState.keep.map(id=>({id})),...photoState.add.map(b=>({b}))];const j=i+d;if(j<0||j>=all.length)return;[all[i],all[j]]=[all[j],all[i]];
+  photoState.order=all;photoState.keep=all.filter(p=>p.id).map(p=>p.id);photoState.add=all.filter(p=>p.b).map(p=>p.b);renderPhotoForm()}
 async function filesToBlobs(files){const out=[];for(const f of files){try{out.push(await compressImg(f))}catch(e){toast('Не удалось открыть фото')}}return out}
-$('photoBtn').onclick=()=>$('photoIn').click();
-$('photoIn').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;photoState.add.push(...await filesToBlobs(fs));renderPhotoForm()};
-/* фото прямо к уже сохранённой записи */
-let photoTarget=null;
-function addPhotosTo(x){photoTarget=x;$('photoQuick').click()}
-$('photoQuick').onchange=async e=>{const fs=[...e.target.files];e.target.value='';const x=photoTarget;if(!fs.length||!x)return;
-  const bl=await filesToBlobs(fs);const ids=photosOf(x);let n=0;
-  for(const b of bl){const id=uid();try{await IDB.put(id,b);ids.push(id);n++}catch(err){toast('Фото не сохранилось')}}
-  delete x.photo;if(ids.length)x.photos=ids;save();rerender();if(n)toast('Фото добавлено: '+n)};
+async function addToForm(e){const fs=[...e.target.files];e.target.value='';if(!fs.length)return;photoState.add.push(...await filesToBlobs(fs));photoState.order=null;renderPhotoForm();
+  toast(`Добавлено. Всего частей: ${photoState.keep.length+photoState.add.length}`)}
+$('photoBtn').onclick=()=>$('photoIn').click();$('photoCamBtn').onclick=()=>$('photoCam').click();
+$('photoIn').onchange=addToForm;$('photoCam').onchange=addToForm;
+// фото к уже сохранённой записи — через окно просмотра
 let viewBlobs=[],viewUrls=[],viewRec=null;
+async function addPhotosToRec(x,files){const bl=await filesToBlobs(files);const ids=photosOf(x);let n=0;
+  for(const b of bl){const id=uid();try{await IDB.put(id,b);ids.push(id);n++}catch(err){toast('Фото не сохранилось')}}
+  delete x.photo;if(ids.length)x.photos=ids;save();rerender();if(n)toast('Добавлено частей: '+n+' · всего: '+ids.length);viewPhotos(x)}
+function addPhotosTo(x){viewPhotos(x)}
+$('phCam').onclick=()=>$('photoQuickCam').click();$('phAdd').onclick=()=>$('photoQuick').click();
+$('photoQuick').onchange=e=>{const fs=[...e.target.files];e.target.value='';if(fs.length&&viewRec)addPhotosToRec(viewRec,fs)};
+$('photoQuickCam').onchange=e=>{const fs=[...e.target.files];e.target.value='';if(fs.length&&viewRec)addPhotosToRec(viewRec,fs)};
 async function viewPhotos(x){viewRec=x;const ids=photosOf(x);viewUrls.forEach(u=>URL.revokeObjectURL(u));viewUrls=[];viewBlobs=[];const box=$('phBox');box.innerHTML='';
   $('phTitle').textContent=x.store+' · '+fmtD(x.date)+' · '+money(x.amount);
-  for(const id of ids){try{const b=await IDB.get(id);
-    if(b){viewBlobs.push(b);const u=URL.createObjectURL(b);viewUrls.push(u);const w=el('div','thumb big');const img=el('img');img.src=u;img.alt='Фото чека';
-      const d=el('button','x','✕');d.onclick=()=>{if(!confirm('Удалить это фото?'))return;x.photos=photosOf(x).filter(k=>k!==id);delete x.photo;if(!x.photos.length)delete x.photos;
-        IDB.del(id).catch(()=>{});save();rerender();viewPhotos(x)};w.append(img,d);box.appendChild(w)}
-    else box.appendChild(el('div','muted','Фото есть на другом устройстве — нажмите «Синхронизировать»'))}catch(e){}}
-  if(!ids.length)box.appendChild(el('div','empty','Фото нет'));
+  $('phSub').textContent=ids.length?`${ids.length} ${plural(ids.length,'часть','части','частей')} чека · листайте вниз · пальцами можно увеличить`:'Фото пока нет. Длинный чек снимайте по частям сверху вниз.';
+  for(let i=0;i<ids.length;i++){const id=ids[i];try{const b=await IDB.get(id);
+    const w=el('div','thumb big');const n=el('span','num','Часть '+(i+1));
+    if(b){viewBlobs.push(b);const u=URL.createObjectURL(b);viewUrls.push(u);const img=el('img');img.src=u;img.alt='Часть '+(i+1);w.appendChild(img)}
+    else w.appendChild(el('div','muted','Это фото есть на другом устройстве — нажмите ⟳ «Синхронизировать»'));
+    const d=el('button','x','✕');d.onclick=()=>{if(!confirm(`Удалить часть ${i+1}?`))return;x.photos=photosOf(x).filter(k=>k!==id);delete x.photo;if(!x.photos.length)delete x.photos;
+      IDB.del(id).catch(()=>{});save();rerender();viewPhotos(x)};
+    w.append(n,d);
+    if(i>0){const up=el('button','mv','↑');up.title='Выше';up.onclick=()=>{const a=photosOf(x);[a[i-1],a[i]]=[a[i],a[i-1]];x.photos=a;save();viewPhotos(x)};w.appendChild(up)}
+    box.appendChild(w)}catch(e){}}
+  $('phCam').textContent=ids.length?'📷 Снять следующую часть':'📷 Снять чек';$('phAdd').textContent=ids.length?'🖼 Ещё из галереи':'🖼 Из галереи';
+  $('phShare').style.display=ids.length?'block':'none';
   $('mPhoto').classList.add('on')}
-$('phAdd').onclick=()=>{$('mPhoto').classList.remove('on');if(viewRec)addPhotosTo(viewRec)};
-$('phShare').onclick=async()=>{if(!viewBlobs.length)return toast('Нет фото');const files=viewBlobs.map((b,i)=>new File([b],`чек_${i+1}.jpg`,{type:'image/jpeg'}));
+$('phShare').onclick=async()=>{if(!viewBlobs.length)return toast('Нет фото');const files=viewBlobs.map((b,i)=>new File([b],`чек_часть_${i+1}.jpg`,{type:'image/jpeg'}));
   if(navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files})}catch(e){}}else download(viewBlobs[0],'чек.jpg')};
 $('phX').onclick=()=>$('mPhoto').classList.remove('on');
 
@@ -801,7 +829,8 @@ async function runSync(c){
   for(const id of need){
     if(!local.has(id)&&remote.has(id)){const s=await fsGet(c,'photos/'+id);if(s){await IDB.put(id,await dataToBlob(s));down++}}
     else if(local.has(id)&&!remote.has(id)){let b=await IDB.get(id);let d=await blobToData(b);
-      if(d.length>990000){b=await compressImg(b,1000,.6);d=await blobToData(b)}
+      if(d.length>990000){b=await compressImg(b,2000,.62);d=await blobToData(b)}
+      if(d.length>1040000){b=await compressImg(b,1500,.55);d=await blobToData(b)}
       if(d.length<=1040000){await fsPut(c,'photos/'+id,d);remote.add(id);up++}}}
   for(const id of [...remote])if(!need.has(id)){if(await fsDel(c,'photos/'+id))remote.delete(id)}
   // 6. записываем изменения в облако
