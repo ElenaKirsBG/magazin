@@ -1,4 +1,6 @@
-# 🛒 Магазин
+# 🛒 Список покупок и учёт расходов
+
+© 2026 [Ваше имя]. Все права защищены — см. файл LICENSE.
 
 Приложение для iPhone: список покупок с галочками + учёт расходов по магазинам, статистика и Excel.
 
@@ -6,7 +8,7 @@
 
 1. Зайдите на github.com → «+» → **New repository**. Имя: `magazin`, тип **Public** → **Create repository**.
 2. Нажмите **uploading an existing file** (или Add file → Upload files).
-3. Выберите ВСЕ файлы из архива (не папку!): `index.html`, `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `README.md` → **Commit changes**.
+3. Выберите ВСЕ файлы из архива (не папку!): `index.html`, `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `README.md`, `LICENSE` → **Commit changes**.
 4. **Settings → Pages** → Source: *Deploy from a branch*, Branch: **main**, папка **/(root)** → **Save**.
 5. Через 1–2 минуты приложение будет по адресу: `https://ВАШ-ЛОГИН.github.io/magazin/`
 6. Откройте адрес в **Safari** → кнопка «Поделиться» → **«На экран Домой»**.
