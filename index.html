@@ -130,6 +130,10 @@ details summary::-webkit-details-marker{display:none}
 .phbox>*{flex:none}
 .steps{padding-left:20px;margin:8px 0 0;font-size:15px;line-height:1.45}.steps li{margin-bottom:8px}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--soft);padding:10px;border-radius:10px;white-space:pre;overflow-x:auto;margin-top:6px}
+.map{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.map:last-child{border-bottom:0}
+.map .nm{flex:1;min-width:0;font-weight:500;font-size:17px}
+.map select{flex:none;max-width:52%;font-size:16px;font-family:inherit;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--soft);color:var(--txt)}
+.map select.none{color:var(--bad)}
 .preview{margin-top:8px;padding:12px;border-radius:14px;background:var(--soft);font-weight:500}
 </style>
 </head>
@@ -253,6 +257,7 @@ details summary::-webkit-details-marker{display:none}
     <div id="storeList"></div>
     <div class="row" style="margin-top:10px"><input id="newStore" placeholder="Новый магазин или статья" enterkeyhint="done"><button class="btn" id="addStore">+</button></div>
   </div>
+  <div class="card" id="mapCard"><h2>Магазины → категории</h2><div class="muted">Выберите, к какой категории относится каждый магазин или статья. Все записи — и старые тоже — сразу посчитаются в «Аналитике» по этим категориям.</div><div id="mapList" style="margin-top:6px"></div></div>
   <div class="card"><h2>Категории расходов</h2><div id="catList"></div><div class="row" style="margin-top:10px"><input id="newCat" placeholder="Новая категория" enterkeyhint="done"><button class="btn" id="addCat">+</button></div></div>
   <div class="card"><h2>Резервная копия</h2>
     <button class="btn" id="bkSave">Создать архив</button>
@@ -268,7 +273,7 @@ details summary::-webkit-details-marker{display:none}
     <details><summary>Расходы и расшифровка</summary><p>Вкладка «Расходы»: дата → магазин или статья → сумма → «Сохранить». Ошиблись — ✎ исправить, ✕ удалить.</p><p>У статей <b>Налоги, Медицина, Страховки, Обслуживание авто</b> есть расшифровка: впишите позиции и цены (например «ТО — 150», «Масло — 45»), для авто — пробег. Сумма посчитается сама. Всё видно в «Журнале с расшифровкой» — когда, что и за сколько меняли. Расшифровку можно включить у любой статьи значком ≡ в списке ниже.</p></details>
     <details><summary>Отделы, цены и корзина</summary><p>Продукты сами раскладываются по отделам магазина (овощи, молочное, бакалея…) — кнопка «По отделам» включает и выключает группировку. Нажмите ⋯ у продукта: можно исправить название, вписать цену и сменить отдел — приложение запомнит отдел для этого продукта.</p><p>Если цены вписаны, вверху видно «В корзине» (отмеченное) и сумму всего списка. Кнопка «Записать купленное в расходы» переносит отмеченные продукты в новую запись расхода с расшифровкой — останется выбрать магазин.</p></details>
     <details><summary>Шаблоны списков</summary><p>Составьте частый список → «Шаблоны списков» → впишите название → «+». Потом одно касание «Добавить» — и продукты в списке (без повторов).</p></details>
-    <details><summary>Категории и фото чеков</summary><p>При записи расхода можно выбрать категорию (Продукты, Транспорт, Дом и ЖКХ…). Для каждого магазина категория запоминается. В «Аналитике» переключатель «Категории» показывает расходы по категориям. Список категорий меняется в Настройках.</p><p>«Фото чека» — снимок сохраняется к записи (значок 🧾 открывает его). Фото хранятся на телефоне и входят в архив.</p></details>
+    <details><summary>Категории и фото чеков</summary><p><b>Категории:</b> в Настройках → «Магазины → категории» укажите для каждого магазина его категорию (Kaufland, T-Market → Продукты; Булсатком → Интернет и связь; заправка → Дизтопливо; Электроэнергия, ВиК, Дрова → Дом и ЖКХ). Все записи, и старые тоже, сразу распределятся. При записи расхода категория подставляется сама; если выбрать другую — она будет только у этой записи. В «Аналитике» переключатель «Категории» показывает расходы по категориям. Список категорий меняется в Настройках.</p><p>«Фото чека» — снимок сохраняется к записи (значок 🧾 открывает его). Фото хранятся на телефоне и входят в архив.</p></details>
     <details><summary>Фото к сохранённым записям</summary><p><b>Длинный чек</b> снимайте по частям сверху вниз: «📷 Снять чек» → снимок → «📷 Снять следующую часть» → и так до конца. Части нумеруются; стрелка ‹ / ↑ меняет порядок, ✕ удаляет часть. «🖼 Из галереи» добавляет сразу несколько готовых снимков.</p><p><b>К уже сохранённой записи:</b> нажмите 📷 (или 🧾 с цифрой — если фото уже есть) у записи в «Последних записях» или «Журнале» → откроется окно с частями чека, там же «Снять следующую часть» и «Из галереи». Через ✎ можно изменить всю запись, включая фото.</p></details>
     <details><summary>☁️ Синхронизация между устройствами — настройка</summary>
       <p>Данные хранятся в вашем личном бесплатном облаке Google Firebase. Настраивается один раз (~10 минут), удобнее с компьютера или iPad.</p>
@@ -308,7 +313,7 @@ service cloud.firestore {
       <li>Синхронизация — не замена архиву: если удалить запись и синхронизировать, она удалится везде. Архив делайте всё равно.</li>
       <li>Обновлять файлы на GitHub <b>можно</b> — данные при этом сохраняются.</li></ul></details>
   </div>
-  <div class="card"><h2>О приложении</h2><div style="font-weight:600">Список покупок и учёт расходов</div><div class="muted">Версия 4.1 · © 2026 Elena Kirsanova. Все права защищены.<br>Копирование, изменение и распространение без письменного разрешения автора запрещены.<br>Установка: Safari → «Поделиться» → «На экран Домой».</div></div>
+  <div class="card"><h2>О приложении</h2><div style="font-weight:600">Список покупок и учёт расходов</div><div class="muted">Версия 4.2 · © 2026 Elena Kirsanova. Все права защищены.<br>Копирование, изменение и распространение без письменного разрешения автора запрещены.<br>Установка: Safari → «Поделиться» → «На экран Домой».</div></div>
 </section>
 </main>
 
@@ -381,9 +386,21 @@ const PAL_D=['#3987e5','#d95926','#199e70','#c98500','#d55181','#008300','#9085e
 const OTHER='#9b9b9b';
 
 /* ---------- данные ---------- */
-function defaults(){return{items:[],draft:'',history:{},stores:['Супермаркет','Рынок','Аптека','Пекарня','Налоги','Медицина','Страховки','Обслуживание авто'],detailCats:['Налоги','Медицина','Страховки','Обслуживание авто'],templates:[],deptMem:{},cats:['Продукты','Бытовое','Здоровье','Транспорт','Дом и ЖКХ','Одежда','Дети','Развлечения','Налоги и страховки','Другое'],storeCat:{'Супермаркет':'Продукты','Рынок':'Продукты','Пекарня':'Продукты','Аптека':'Здоровье','Медицина':'Здоровье','Налоги':'Налоги и страховки','Страховки':'Налоги и страховки','Обслуживание авто':'Транспорт'},expenses:[],settings:{font:20,currency:'€',theme:'sea',budget:0,groupList:true,donutBy:'store'}}}
+const CAT_GUESS=[['Продукты',/kaufland|кауфланд|lidl|лидл|billa|билла|fantastico|фантастико|t-?market|т-?маркет|metro|cba|супермаркет|рынок|пекарн|market|маркет|продукт|пят[её]рочк|перекр[её]ст|магнит|ашан|лента/i],
+ ['Интернет и связь',/интернет|булсатком|bulsatcom|vivacom|виваком|yettel|теленор|telenor|связь|телефон|мобил|сотов/i],
+ ['Дизтопливо',/топлив|дизел|бензин|азс|заправ|shell|omv|lukoil|лукойл|petrol|петрол/i],
+ ['Дом и ЖКХ',/электро|вик|вод[аы]|газ|отоплен|дрова|жкх|квартпл|коммунал|аренд|ремонт/i],
+ ['Здоровье',/аптек|медицин|врач|клиник|стомат/i],['Налоги и страховки',/налог|страхов/i],['Транспорт',/авто|машин|такси|автобус|парков/i]];
+function defaults(){return{items:[],draft:'',history:{},stores:['Супермаркет','Рынок','Аптека','Пекарня','Налоги','Медицина','Страховки','Обслуживание авто'],detailCats:['Налоги','Медицина','Страховки','Обслуживание авто'],templates:[],deptMem:{},cats:['Продукты','Дом и ЖКХ','Интернет и связь','Дизтопливо','Транспорт','Здоровье','Бытовое','Налоги и страховки','Одежда','Дети','Развлечения','Другое'],storeCat:{'Супермаркет':'Продукты','Рынок':'Продукты','Пекарня':'Продукты','Аптека':'Здоровье','Медицина':'Здоровье','Налоги':'Налоги и страховки','Страховки':'Налоги и страховки','Обслуживание авто':'Транспорт'},expenses:[],settings:{font:20,currency:'€',theme:'sea',budget:0,groupList:true,donutBy:'store'}}}
 function normalize(o){o=o||{};const r=Object.assign(defaults(),o);r.settings=Object.assign(defaults().settings,o.settings||{});
   ['items','stores','expenses'].forEach(k=>{if(!Array.isArray(r[k]))r[k]=[]});if(!r.history||typeof r.history!=='object')r.history={};if(!Array.isArray(r.detailCats))r.detailCats=[];['templates','cats'].forEach(k=>{if(!Array.isArray(r[k]))r[k]=defaults()[k]});['deptMem','storeCat','history'].forEach(k=>{if(!r[k]||typeof r[k]!=='object')r[k]={}});r.expenses.forEach(x=>{if(x.photo&&!x.photos)x.photos=[x.photo];delete x.photo});
+  if(!r.settings.v5){const old=['Продукты','Бытовое','Здоровье','Транспорт','Дом и ЖКХ','Одежда','Дети','Развлечения','Налоги и страховки','Другое'];
+    if(JSON.stringify(r.cats)===JSON.stringify(old))r.cats=['Продукты','Дом и ЖКХ','Интернет и связь','Дизтопливо','Транспорт','Здоровье','Бытовое','Налоги и страховки','Одежда','Дети','Развлечения','Другое'];
+    else['Интернет и связь','Дизтопливо'].forEach(c=>{if(!r.cats.includes(c))r.cats.push(c)});
+    const names=[...r.stores];r.expenses.forEach(x=>{if(!names.includes(x.store))names.push(x.store)});
+    r.expenses.forEach(x=>{if(x.cat&&!r.storeCat[x.store]&&r.cats.includes(x.cat))r.storeCat[x.store]=x.cat});
+    names.forEach(st=>{if(!r.storeCat[st]){for(const[c,rx]of CAT_GUESS)if(rx.test(st)&&r.cats.includes(c)){r.storeCat[st]=c;break}}});
+    r.expenses.forEach(x=>{if(x.cat&&x.cat===r.storeCat[x.store])delete x.cat});r.settings.v5=1}
   if(!r.settings.v3){['Налоги','Медицина','Страховки','Обслуживание авто'].forEach(c=>{if(!r.stores.includes(c))r.stores.push(c);if(!r.detailCats.includes(c))r.detailCats.push(c)});r.settings.v3=1}
   return r}
 function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY)||'null'))}catch(e){return defaults()}}
@@ -406,6 +423,10 @@ const sum=l=>r2(l.reduce((a,x)=>a+x.amount,0));
 function group(list,keyFn){const m=new Map();list.forEach(x=>{const k=keyFn(x);const g=m.get(k)||{sum:0,n:0};g.sum+=x.amount;g.n++;m.set(k,g)});return m}
 const isDark=()=>!!(THEMES[S.settings.theme]||{}).dark;
 function storeColor(name){const i=S.stores.indexOf(name);return i>=0&&i<8?(isDark()?PAL_D:PAL_L)[i]:OTHER}
+const NOCAT='Без категории';
+// категория записи: своя (если выбрана вручную) или категория магазина
+function catOf(x){const c=x.cat||S.storeCat[x.store];return c&&S.cats.includes(c)?c:NOCAT}
+function guessCat(store){for(const[c,rx]of CAT_GUESS)if(rx.test(store)&&S.cats.includes(c))return c;return null}
 
 /* ---------- оформление ---------- */
 function applyTheme(){const t=THEMES[S.settings.theme]||THEMES.sea,st=document.documentElement.style;
@@ -541,7 +562,7 @@ $('impX').onclick=()=>$('mImp').classList.remove('on');
 let selStore=null,editId=null,lines=[],detOpen=false;
 const isDet=s=>S.detailCats.includes(s);
 const isAuto=s=>/авто|машин/i.test(s||'');
-function chip(s){const c=el('button','chip'+(s===selStore?' on':''),s);c.onclick=()=>{selStore=s;if(!selCat&&S.storeCat[s]&&S.cats.includes(S.storeCat[s])){selCat=S.storeCat[s];renderCats()}detOpen=detOpen||isDet(s)||lines.some(l=>l.name||l.price);if(detOpen&&!lines.length)lines=[{name:'',price:''}];renderChips();renderDet()};return c}
+function chip(s){const c=el('button','chip'+(s===selStore?' on':''),s);c.onclick=()=>{selStore=s;if(S.storeCat[s]&&S.cats.includes(S.storeCat[s])){selCat=S.storeCat[s]}else selCat=null;renderCats();detOpen=detOpen||isDet(s)||lines.some(l=>l.name||l.price);if(detOpen&&!lines.length)lines=[{name:'',price:''}];renderChips();renderDet()};return c}
 function renderChips(){const b=$('eStores');b.innerHTML='';
   const st=S.stores.filter(s=>!isDet(s)),dc=S.stores.filter(isDet);
   if(!S.stores.length)b.appendChild(el('div','muted','Добавьте магазины в Настройках'));
@@ -574,7 +595,7 @@ function budgetInfo(boxId,txtId,progId,monthStr){const B=S.settings.budget;$(box
 const linesTxt=x=>(x.lines||[]).map(l=>l.name+(l.price?' — '+money(l.price):'')).join(' · ');
 function expRow(x,withActions){const r=el('div','exp');const nm=el('div','nm',x.store);
   const sub=[x.km?Number(x.km).toLocaleString('ru-RU')+' км':'',x.note].filter(Boolean).join(' · ');if(sub)nm.appendChild(el('div','muted',sub));
-  if(x.cat)nm.firstChild.after(el('div','muted',x.cat));
+  {const c=catOf(x);if(c!==NOCAT)nm.firstChild.after(el('div','muted',c))}
   if(x.lines&&x.lines.length)nm.appendChild(el('div','muted',linesTxt(x)));
   r.append(nm,el('div','amt',money(x.amount)));
   {const n=photosOf(x).length;const ph=el('button','x',n?'🧾'+(n>1?n:''):'📷');ph.title=n?'Фото чека':'Добавить фото';ph.onclick=()=>viewPhotos(x);r.appendChild(ph)}
@@ -606,7 +627,7 @@ function renderShop(){
   renderJournal()}
 function startEdit(x){showTab('shop');editId=x.id;$('eDate').value=x.date;selStore=x.store;if(!S.stores.includes(x.store)){S.stores.push(x.store);save()}
   $('eAmt').value=String(x.amount).replace('.',',');$('eNote').value=x.note||'';$('eKm').value=x.km||'';
-  selCat=x.cat||null;photoState={keep:photosOf(x),add:[]};renderPhotoForm();
+  selCat=x.cat||S.storeCat[x.store]||null;photoState={keep:photosOf(x),add:[]};renderPhotoForm();
   lines=(x.lines||[]).map(l=>({name:l.name,price:String(l.price||'').replace('.',',')}));detOpen=lines.length>0||isDet(x.store);if(detOpen&&!lines.length)lines=[{name:'',price:''}];
   $('expTitle').textContent='Редактирование';$('eSave').textContent='Сохранить изменения';$('eCancel').style.display='block';
   renderChips();renderDet();renderCats();window.scrollTo({top:0,behavior:'smooth'})}
@@ -619,7 +640,8 @@ $('eSave').onclick=async()=>{let amt=num($('eAmt').value);
   if(!selStore)return toast('Выберите магазин или статью');if(!(amt>0))return toast('Введите сумму');
   const rec={date:$('eDate').value||today(),store:selStore,amount:r2(amt),note:$('eNote').value.trim()};
   if(ls.length)rec.lines=ls;const km=parseInt(($('eKm').value||'').replace(/\D/g,''));if(isAuto(selStore)&&km>0)rec.km=km;
-  if(selCat){rec.cat=selCat;S.storeCat[selStore]=selCat}
+  if(selCat&&selCat!==S.storeCat[selStore])rec.cat=selCat; // своя категория только если отличается от категории магазина
+  if(selCat&&!S.storeCat[selStore])S.storeCat[selStore]=selCat;
   const old=editId?S.expenses.find(x=>x.id===editId):null;const ids=[...photoState.keep];
   for(const b of photoState.add){try{const id=uid();await IDB.put(id,b);ids.push(id)}catch(e){toast('Фото не сохранилось')}}
   if(old)photosOf(old).filter(id=>!ids.includes(id)).forEach(id=>IDB.del(id).catch(()=>{}));
@@ -637,12 +659,12 @@ function renderSettings(){renderSync();renderThemes();renderCur();$('budget').va
     dt.onclick=()=>{isDet(s)?S.detailCats=S.detailCats.filter(c=>c!==s):S.detailCats.push(s);save();renderSettings();toast(isDet(s)?'Расшифровка включена':'Расшифровка выключена')};
     up.onclick=()=>{if(i>0){[S.stores[i-1],S.stores[i]]=[S.stores[i],S.stores[i-1]];save();renderSettings()}};
     rn.onclick=()=>{const v=(prompt('Новое название:',s)||'').trim();if(!v||v===s)return;if(S.stores.includes(v))return toast('Такое название уже есть');
-      S.stores[i]=v;S.expenses.forEach(x=>{if(x.store===s)x.store=v});S.detailCats=S.detailCats.map(c=>c===s?v:c);if(selStore===s)selStore=v;if(aStores.delete(s))aStores.add(v);save();renderSettings()};
+      S.stores[i]=v;S.expenses.forEach(x=>{if(x.store===s)x.store=v});S.detailCats=S.detailCats.map(c=>c===s?v:c);if(S.storeCat[s]){S.storeCat[v]=S.storeCat[s];delete S.storeCat[s]}if(selStore===s)selStore=v;if(aStores.delete(s))aStores.add(v);save();renderSettings()};
     del.onclick=()=>{if(confirm(`Удалить «${s}» из списка?\nЗаписи расходов сохранятся.`)){S.stores.splice(i,1);save();renderSettings()}};
     r.append(dot,nm,dt,up,rn,del);sl.appendChild(r)});
   if(S.stores.length>8)sl.appendChild(el('div','muted','Первые 8 позиций получают свой цвет на диаграмме, остальные — «Другие». Порядок меняется стрелкой ↑. Значок ≡ включает расшифровку.'))}
 function addStore(){const v=$('newStore').value.trim();if(!v)return;if(S.stores.includes(v))return toast('Такое название уже есть');
-  S.stores.push(v);$('newStore').value='';save();renderSettings();toast('Добавлено')}
+  S.stores.push(v);const g=guessCat(v);if(g&&!S.storeCat[v])S.storeCat[v]=g;$('newStore').value='';save();renderSettings();toast(g?'Добавлено · категория: '+g+' (можно изменить ниже)':'Добавлено — выберите ему категорию ниже')}
 $('addStore').onclick=addStore;$('newStore').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addStore()}};
 
 /* ---------- место на телефоне ---------- */
@@ -733,14 +755,25 @@ $('phX').onclick=()=>$('mPhoto').classList.remove('on');
 let selCat=null;
 function catColor(name){const i=S.cats.indexOf(name);return i>=0&&i<8?(isDark()?PAL_D:PAL_L)[i]:OTHER}
 function renderCats(){const b=$('eCats');b.innerHTML='';S.cats.forEach(c=>{const ch=el('button','chip sm'+(c===selCat?' on':''),c);ch.onclick=()=>{selCat=selCat===c?null:c;renderCats()};b.appendChild(ch)})}
-function renderCatSettings(){const box=$('catList');box.innerHTML='';
+function renderMap(){const box=$('mapList');if(!box)return;box.innerHTML='';
+  allStoreNames().forEach(st=>{const r=el('div','map');const sel=el('select');
+    const o0=el('option','','— без категории —');o0.value='';sel.appendChild(o0);
+    S.cats.forEach(c=>{const o=el('option','',c);o.value=c;sel.appendChild(o)});
+    const cur=S.storeCat[st]&&S.cats.includes(S.storeCat[st])?S.storeCat[st]:'';sel.value=cur;sel.classList.toggle('none',!cur);
+    sel.onchange=()=>{const old=S.storeCat[st];if(sel.value)S.storeCat[st]=sel.value;else delete S.storeCat[st];
+      S.expenses.forEach(x=>{if(x.store===st)delete x.cat}); // все записи магазина переходят в выбранную категорию
+      save();sel.classList.toggle('none',!sel.value);renderCatSettings();toast(st+' → '+(sel.value||'без категории'))};
+    const n=S.expenses.filter(x=>x.store===st).length;const nm=el('div','nm',st);if(n)nm.appendChild(el('div','muted',n+' '+plural(n,'запись','записи','записей')));
+    r.append(nm,sel);box.appendChild(r)})}
+function renderCatSettings(){renderMap();const box=$('catList');box.innerHTML='';
   S.cats.forEach((c,i)=>{const r=el('div','exp');const dot=el('span','');dot.style.cssText=`width:11px;height:11px;border-radius:50%;flex:none;background:${catColor(c)}`;
     const up=el('button','x','↑'),rn=el('button','x','✎'),del=el('button','x','✕');
     up.onclick=()=>{if(i>0){[S.cats[i-1],S.cats[i]]=[S.cats[i],S.cats[i-1]];save();renderCatSettings()}};
     rn.onclick=()=>{const v=(prompt('Новое название категории:',c)||'').trim();if(!v||v===c)return;if(S.cats.includes(v))return toast('Такая категория уже есть');
       S.cats[i]=v;S.expenses.forEach(x=>{if(x.cat===c)x.cat=v});Object.keys(S.storeCat).forEach(k=>{if(S.storeCat[k]===c)S.storeCat[k]=v});save();renderCatSettings()};
-    del.onclick=()=>{if(confirm(`Удалить категорию «${c}»?\nЗаписи останутся, но станут «Без категории».`)){S.cats.splice(i,1);S.expenses.forEach(x=>{if(x.cat===c)delete x.cat});save();renderCatSettings()}};
-    r.append(dot,el('div','nm',c),up,rn,del);box.appendChild(r)})}
+    del.onclick=()=>{if(confirm(`Удалить категорию «${c}»?\nЗаписи и магазины этой категории станут «Без категории».`)){S.cats.splice(i,1);S.expenses.forEach(x=>{if(x.cat===c)delete x.cat});Object.keys(S.storeCat).forEach(k=>{if(S.storeCat[k]===c)delete S.storeCat[k]});save();renderCatSettings()}};
+    const nm=el('div','nm',c);const sts=allStoreNames().filter(st=>S.storeCat[st]===c);nm.appendChild(el('div','muted',sts.length?sts.join(', '):'магазины не назначены'));
+    r.append(dot,nm,up,rn,del);box.appendChild(r)})}
 function addCat(){const v=$('newCat').value.trim();if(!v)return;if(S.cats.includes(v))return toast('Такая категория уже есть');S.cats.push(v);$('newCat').value='';save();renderCatSettings()}
 $('addCat').onclick=addCat;$('newCat').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addCat()}};
 document.querySelectorAll('#byseg button').forEach(b=>b.onclick=()=>{S.settings.donutBy=b.dataset.b;save();renderStats()});
@@ -941,9 +974,10 @@ function renderStats(){
   renderStoreFilter();
   // кольцевая диаграмма по магазинам (цвет закреплён за магазином)
   const by=S.settings.donutBy==='cat'?'cat':'store';document.querySelectorAll('#byseg button').forEach(b=>b.classList.toggle('on',b.dataset.b===by));
-  const g=group(list,by==='cat'?(x=>x.cat||'Без категории'):(x=>x.store));const parts=[];let other={name:by==='cat'?'Прочие категории':'Другие',val:0,n:0,color:OTHER};
-  [...g].sort((a,b)=>b[1].sum-a[1].sum).forEach(([k,v])=>{const c=(by==='cat'?catColor:storeColor)(k);if(c===OTHER){other.val+=v.sum;other.n+=v.n}else parts.push({name:k,val:v.sum,n:v.n,color:c})});
-  if(other.val)parts.push(other);
+  const GRAYS=['#8a8f98','#6f747c','#a7abb2','#565b63','#bcc0c6','#7d828a'];let gi=0;
+  const g=group(list,by==='cat'?catOf:(x=>x.store));const parts=[];
+  [...g].sort((a,b)=>(a[0]===NOCAT)-(b[0]===NOCAT)||b[1].sum-a[1].sum).forEach(([k,v])=>{let c=k===NOCAT?'#d6d8dc':(by==='cat'?catColor:storeColor)(k);if(c===OTHER)c=GRAYS[gi++%GRAYS.length];
+    const sts=by==='cat'?[...new Set(list.filter(x=>catOf(x)===k).map(x=>x.store))]:[];parts.push({name:k,val:v.sum,n:v.n,color:c,sts})});
   $('donutBox').innerHTML=`<div class="donut">${donutSVG(parts,total)}<div class="c"><b id="dcV"></b><span id="dcL"></span></div></div>`;
   const center=i=>{if(i==null){$('dcV').textContent=money0(total);$('dcL').textContent=total?'всего':'нет расходов'}
     else{const p=parts[i];$('dcV').textContent=money0(p.val);$('dcL').textContent=p.name+' · '+Math.round(p.val/total*100)+'%'}
@@ -953,7 +987,8 @@ function renderStats(){
   $('donutBox').querySelectorAll('.seg-arc').forEach(a=>a.onclick=()=>pick(+a.dataset.i));
   const lg=$('legend');lg.innerHTML='';
   parts.forEach((p,i)=>{const row=el('div','leg');const dot=el('span','dot');dot.style.background=p.color;
-    const nm=el('div','nm',p.name);nm.appendChild(el('div','muted',p.n+' '+plural(p.n,'покупка','покупки','покупок')));
+    const nm=el('div','nm',p.name);nm.appendChild(el('div','muted',p.n+' '+plural(p.n,'покупка','покупки','покупок')+(p.sts&&p.sts.length?' · '+p.sts.join(', '):'')));
+    if(p.name===NOCAT){const go=el('button','chip sm on','Распределить по категориям');go.style.marginTop='6px';go.onclick=e=>{e.stopPropagation();showTab('set');setTimeout(()=>$('mapCard').scrollIntoView({behavior:'smooth'}),100)};nm.appendChild(go)}
     row.append(dot,nm,el('div','amt',money(p.val)),el('div','pc',Math.round(p.val/total*100)+'%'));row.onclick=()=>pick(i);lg.appendChild(row)});
   center(null);
   // столбики по времени
@@ -977,13 +1012,13 @@ function buildWorkbook(list,label){
   gs.forEach(([k,v])=>a1.push([k,r2(v.sum),v.n,total?Math.round(v.sum/total*1000)/10:0]));
   const w1=X.utils.aoa_to_sheet(a1);w1['!cols']=[{wch:24},{wch:16},{wch:10},{wch:10}];X.utils.book_append_sheet(wb,w1,'Итоги');
   const a2=[['Дата','День недели','Магазин / статья','Сумма ('+cur+')','Комментарий','Пробег, км','Расшифровка','Категория']];
-  rows.forEach(x=>a2.push([x.date,pd(x.date).toLocaleDateString('ru-RU',{weekday:'long'}),x.store,x.amount,x.note||'',x.km||'',(x.lines||[]).map(l=>l.name+(l.price?' — '+l.price:'')).join('; '),x.cat||'']));
+  rows.forEach(x=>a2.push([x.date,pd(x.date).toLocaleDateString('ru-RU',{weekday:'long'}),x.store,x.amount,x.note||'',x.km||'',(x.lines||[]).map(l=>l.name+(l.price?' — '+l.price:'')).join('; '),catOf(x)]));
   a2.push([]);a2.push(['ИТОГО','','',total,'']);
   const w2=X.utils.aoa_to_sheet(a2);
   rows.forEach((x,i)=>{w2[X.utils.encode_cell({r:i+1,c:0})]={t:'n',v:serial(x.date),z:'dd.mm.yyyy'};w2[X.utils.encode_cell({r:i+1,c:3})].z='0.00'});
   if(rows.length)w2[X.utils.encode_cell({r:rows.length+2,c:3})]={t:'n',v:total,f:`SUM(D2:D${rows.length+1})`,z:'0.00'};
   w2['!cols']=[{wch:12},{wch:14},{wch:22},{wch:14},{wch:26},{wch:11},{wch:50},{wch:18}];X.utils.book_append_sheet(wb,w2,'Записи');
-  const gc=[...group(rows,x=>x.cat||'Без категории')].sort((a,b)=>b[1].sum-a[1].sum);const a6=[['Категория','Сумма ('+cur+')','Покупок','Доля %']];
+  const gc=[...group(rows,catOf)].sort((a,b)=>b[1].sum-a[1].sum);const a6=[['Категория','Сумма ('+cur+')','Покупок','Доля %']];
   gc.forEach(([k,v])=>a6.push([k,r2(v.sum),v.n,total?Math.round(v.sum/total*1000)/10:0]));const w6=X.utils.aoa_to_sheet(a6);w6['!cols']=[{wch:22},{wch:14},{wch:10},{wch:10}];X.utils.book_append_sheet(wb,w6,'По категориям');
   const dl=[];rows.forEach(x=>(x.lines||[]).forEach(l=>dl.push([x.date,x.store,l.name,l.price||'',x.km||'',x.note||''])));
   if(dl.length){const a5=[['Дата','Статья','Наименование','Цена ('+cur+')','Пробег, км','Комментарий']].concat(dl);const w5=X.utils.aoa_to_sheet(a5);
