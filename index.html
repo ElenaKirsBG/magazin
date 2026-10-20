@@ -266,6 +266,7 @@ details summary::-webkit-details-marker{display:none}
     <div class="muted" style="margin-top:10px">Архив .zip содержит все данные, фото чеков и таблицу Excel. Сохраните его в «Файлы» или отправьте себе. Загружать можно .zip или .json.</div>
   </div>
   <div class="card"><h2>Подсказки «Часто покупаете»</h2><button class="btn ghost" id="clrHist" style="margin-top:0">Очистить историю продуктов</button></div>
+  <div class="card"><h2>Работа без интернета</h2><div id="offInfo"></div><button class="btn ghost" id="offCheck">Проверить</button></div>
   <div class="card"><h2>Место на телефоне</h2><div id="stInfo"></div><button class="btn ghost" id="stRefresh">Обновить</button></div>
   <div class="card help"><h2>Как пользоваться</h2>
     <details><summary>Список покупок</summary><p>Напишите продукты столбиком и нажмите «Сделать список с галочками». Касание строки — продукт куплен (зачёркивается). «Оставить только некупленные» убирает купленное. Внизу — подсказки «Часто покупаете»: одно касание добавляет продукт.</p></details>
@@ -304,6 +305,7 @@ service cloud.firestore {
     <details><summary>Резервная копия — зачем и как</summary><p>Все данные хранятся <b>только на этом телефоне</b>, на сервере их нет. Архив — единственный способ не потерять их при поломке, смене телефона или случайном удалении.</p><p><b>Создать:</b> «Создать архив» → «Отправить / сохранить» → «Сохранить в Файлы» (лучше в iCloud Drive) или отправить себе в мессенджер. Делайте раз в неделю-две и обязательно перед обновлением iOS или сменой телефона.</p><p><b>Восстановить</b> (или перенести на другой телефон): «Загрузить резервную копию» → выберите файл .zip. Текущие данные заменятся данными из архива.</p></details>
     <details class="warn"><summary>⚠️ Чего НЕ делать, чтобы не потерять данные</summary><ul>
       <li><b>Не удаляйте значок</b> с экрана «Домой» — вместе с ним удаляются все данные. Поставили заново — будет пусто, поможет только архив.</li>
+      <li><b>После каждого обновления</b> на GitHub откройте приложение один раз с Wi‑Fi, закройте и откройте снова — и проверьте «Настройки → Работа без интернета: ✅ Готово».</li>
       <li><b>Не открывайте приложение через Safari по ссылке</b> — там отдельное пустое хранилище. Только значок на экране «Домой».</li>
       <li><b>Не очищайте</b> «Настройки → Safari → Очистить историю и данные» и «Дополнения → Данные сайтов → Удалить все» — это может стереть данные.</li>
       <li><b>Не переименовывайте</b> репозиторий на GitHub и не меняйте логин — у приложения сменится адрес и оно откроется пустым.</li>
@@ -313,7 +315,7 @@ service cloud.firestore {
       <li>Синхронизация — не замена архиву: если удалить запись и синхронизировать, она удалится везде. Архив делайте всё равно.</li>
       <li>Обновлять файлы на GitHub <b>можно</b> — данные при этом сохраняются.</li></ul></details>
   </div>
-  <div class="card"><h2>О приложении</h2><div style="font-weight:600">Список покупок и учёт расходов</div><div class="muted">Версия 4.2 · © 2026 Elena Kirsanova. Все права защищены.<br>Копирование, изменение и распространение без письменного разрешения автора запрещены.<br>Установка: Safari → «Поделиться» → «На экран Домой».</div></div>
+  <div class="card"><h2>О приложении</h2><div style="font-weight:600">Список покупок и учёт расходов</div><div class="muted">Версия 4.3 · © 2026 Elena Kirsanova. Все права защищены.<br>Копирование, изменение и распространение без письменного разрешения автора запрещены.<br>Установка: Safari → «Поделиться» → «На экран Домой».</div></div>
 </section>
 </main>
 
@@ -462,7 +464,7 @@ function showTab(t){curTab=t;
   document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on',s.id==='t-'+t));
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   $('ttl').textContent=titles[t];rerender();window.scrollTo(0,0)}
-function rerender(){const d=new Date();$('sub').textContent=d.getDate()+' '+MON_GEN[d.getMonth()]+', '+d.toLocaleDateString('ru-RU',{weekday:'long'});
+function rerender(){if(typeof netBadge==='function')netBadge();
   if(curTab==='list')renderList();if(curTab==='shop')renderShop();if(curTab==='stat')renderStats();if(curTab==='set')renderSettings()}
 
 /* ---------- список покупок ---------- */
@@ -650,7 +652,7 @@ $('eSave').onclick=async()=>{let amt=num($('eAmt').value);
   save();resetForm();renderShop();toast('Сохранено');$('eAmt').blur()};
 
 /* ---------- настройки: магазины и статьи ---------- */
-function renderSettings(){renderSync();renderThemes();renderCur();$('budget').value=S.settings.budget||'';renderStorage();renderCatSettings();
+function renderSettings(){renderSync();if(typeof checkOffline==='function')checkOffline();renderThemes();renderCur();$('budget').value=S.settings.budget||'';renderStorage();renderCatSettings();
   const sl=$('storeList');sl.innerHTML='';
   S.stores.forEach((s,i)=>{const r=el('div','exp');const dot=el('span','');dot.style.cssText=`width:11px;height:11px;border-radius:50%;flex:none;background:${storeColor(s)}`;
     const nm=el('div','nm',s);if(isDet(s))nm.appendChild(el('div','muted','с расшифровкой'));
@@ -683,6 +685,7 @@ async function renderStorage(){const box=$('stInfo');if(!box)return;
   box.innerHTML='';rows.forEach(([a,b])=>{const r=el('div','exp');r.append(el('div','nm',a),el('div','amt',b));r.firstChild.style.fontWeight='400';box.appendChild(r)});
   const tip=el('div','muted',pct>60?'⚠️ Хранилище заполнено больше чем наполовину — сделайте архив и удалите старые записи.':'Места достаточно: примерно 20–25 тысяч записей поместится без проблем.');tip.style.marginTop='8px';box.appendChild(tip)}
 $('stRefresh').onclick=renderStorage;
+$('offCheck').onclick=()=>checkOffline();
 $('rulesCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('rulesTxt').textContent);toast('Правила скопированы')}catch(e){toast('Выделите текст и скопируйте вручную')}};
 $('clrHist').onclick=()=>{if(confirm('Очистить подсказки «Часто покупаете»?')){S.history={};save();toast('Очищено')}};
 
@@ -1077,7 +1080,21 @@ $('bkFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f
 /* ---------- запуск ---------- */
 function applyAll(){renderSync();applyFont();applyTheme();$('draft').value=S.draft||'';$('eDate').value=today();resetForm();rerender()}
 applyAll();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{});
+  let reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!reloaded){reloaded=true;setTimeout(checkOffline,1500)}})}
+/* ---------- готовность к работе без интернета ---------- */
+async function checkOffline(){const box=$('offInfo');if(!box)return;let sw=false,shell=false,libs=0;
+  try{sw=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);
+    for(const k of await caches.keys()){const c=await caches.open(k);if(await c.match('./index.html'))shell=true;
+      for(const u of['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js','https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'])if(await c.match(u))libs++}}catch(e){}
+  const ready=sw&&shell;const standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+  box.innerHTML='';
+  const st=el('div','',ready?'✅ Готово: приложение сохранено на телефоне и откроется без интернета':'⏳ Ещё не готово: откройте приложение с Wi‑Fi, подождите 10 секунд, закройте и откройте снова');
+  st.style.cssText='font-weight:600;font-size:16px;color:'+(ready?'var(--acc)':'var(--bad)');box.appendChild(st);
+  const d=el('div','muted',`Модуль офлайн-работы: ${sw?'работает':'не запущен'} · Файлы приложения: ${shell?'сохранены':'нет'} · Excel и архив без сети: ${libs>=2?'да':'нет'}`);d.style.marginTop='6px';box.appendChild(d);
+  if(!standalone){const w=el('div','muted','⚠️ Сейчас приложение открыто в Safari. Без интернета работает только значок на экране «Домой».');w.style.cssText='margin-top:6px;color:var(--bad)';box.appendChild(w)}}
+function netBadge(){const s=$('sub');if(!s)return;const d=new Date();s.textContent=d.getDate()+' '+MON_GEN[d.getMonth()]+', '+d.toLocaleDateString('ru-RU',{weekday:'long'})+(navigator.onLine?'':' · без интернета')}
+addEventListener('online',netBadge);addEventListener('offline',netBadge);netBadge();setTimeout(checkOffline,2500);
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 </script>
 </body>
